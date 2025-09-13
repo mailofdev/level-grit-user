@@ -48,7 +48,7 @@ const LoginForm = () => {
   return (
     <div
       className="d-flex justify-content-center align-items-center vh-100"
-      style={{ backgroundColor: "#FDF4DC", borderRadius: "10px" }}
+      style={{ backgroundColor: "#bbd6fd", borderRadius: "10px" }}
     >
       <div
         className="card p-4 shadow-sm"
@@ -61,7 +61,7 @@ const LoginForm = () => {
             style={{ height: "100px", width: "100px" }}
           />
         </div>
-        <h4 className="mb-3 text-center">Login</h4>
+        {/* <h4 className="mb-3 text-center">Login</h4> */}
         {errorMessage && (
           <div className="alert alert-danger py-2">{errorMessage}</div>
         )}

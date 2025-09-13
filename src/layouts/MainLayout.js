@@ -25,7 +25,7 @@ const MainLayout = ({ children, config }) => {
           showNavMenu={true} 
           showUserMenu={true} 
           showThemeToggle={false} 
-          showIcons={true} 
+          showIcons={false} 
           // user={
           //   user ? { 
           //   // name: user.name, 
