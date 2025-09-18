@@ -1,13 +1,12 @@
-// src/features/auth/components/LoginForm.js
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { loginThunk } from "./authThunks";
 import { encryptToken } from "../../utils/crypto";
 import DynamicForm from "../../components/forms/DynamicForm";
-import routes from "../../components/navigation/Routes";
-import DisplayImage from "../../components/display/DisplayImage";
-import logo from "../../assets/images/logo.png";
+import logo from "../../assets/images/logo3.jpeg";
+import Loader from "../../components/display/Loader";
+
 const LoginForm = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -19,26 +18,34 @@ const LoginForm = () => {
 
   const [formData, setFormData] = useState({});
   const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = async (data) => {
-    setErrorMessage("");
-    try {
-      // const result = await dispatch(loginThunk(data)).unwrap();
-      // const encrypted = encryptToken(result.accessToken);
-      // sessionStorage.setItem("access_token", encrypted);
-      // navigate("/dashboard", { replace: true });
-      if (
-        data.email === "admin@gmail.com" &&
-        data.password === "test123"
-      ) {
-        // optional: set a dummy token/session
-        sessionStorage.setItem("access_token", "dummy-static-token");
-        navigate("/dashboard", { replace: true });
-      }
-    } catch (error) {
-      setErrorMessage(error || "Login failed. Please try again.");
+const handleSubmit = async (data) => {
+  setErrorMessage("");
+  setIsLoading(true);
+  try {
+    const resultAction = await dispatch(loginThunk(formData));
+
+    setIsLoading(false);
+
+    if (loginThunk.fulfilled.match(resultAction)) {
+      // Login was successful
+      const userInfo = resultAction.payload.userInfo;
+      const encryptedUserData = encryptToken(JSON.stringify(userInfo));
+      sessionStorage.setItem("user", JSON.stringify(encryptedUserData));
+      navigate("/dashboard", { replace: true });
+    } else {
+      // Login failed
+      const message = resultAction.payload || "Login failed. Please try again.";
+      setErrorMessage(message);
     }
-  };
+  } catch (error) {
+    setIsLoading(false);
+    const message = error?.message || String(error) || "Login failed. Please try again.";
+    setErrorMessage(message);
+  }
+};
+
 
   const handleCancel = () => {
     setFormData({});
@@ -48,24 +55,36 @@ const LoginForm = () => {
   return (
     <div
       className="d-flex justify-content-center align-items-center vh-100"
-      style={{ backgroundColor: "#bbd6fd", borderRadius: "10px" }}
+      style={{
+        background: "linear-gradient(135deg, #e0f7fa 0%, #e8f5e9 100%)",
+        padding: "20px"
+      }}
     >
+      {isLoading && <Loader fullScreen={true} text="Logging in..." color="#43a047" />}
       <div
-        className="card p-4 shadow-sm"
-        style={{ maxWidth: "400px", width: "100%" }}
+        className="card p-4 shadow-lg"
+        style={{
+          maxWidth: "400px",
+          width: "100%",
+          borderRadius: "15px",
+          border: "none"
+        }}
       >
-        <div className="text-center">
+        <div className="text-center mb-3">
           <img
             src={logo}
             alt="Level Grit Logo"
-            style={{ height: "100px", width: "100px" }}
+            style={{ height: "100px", width: "100px", borderRadius: "50%", objectFit: "cover" }}
           />
         </div>
-        {/* <h4 className="mb-3 text-center">Login</h4> */}
+        <h4 className="mb-4 text-center" style={{ color: "#2e7d32", fontWeight: "600" }}>
+          Welcome Back!
+        </h4>
         {errorMessage && (
-          <div className="alert alert-danger py-2">{errorMessage}</div>
+          <div className="alert alert-danger py-2" style={{ fontSize: "0.9rem" }}>
+            {errorMessage}
+          </div>
         )}
-
         <DynamicForm
           schema={schema}
           formData={formData}
@@ -74,17 +93,17 @@ const LoginForm = () => {
           onCancel={handleCancel}
           singleButtonInCenter={true}
           twoRowForm={false}
+          buttonClass="btn btn-success w-100"
         />
-
-        <div className="text-center mt-3">
+        <div className="text-center mt-3" style={{ fontSize: "0.9rem" }}>
           {/* <p className="mb-1">
             Don&apos;t have an account?{" "}
-            <Link to="/register" className="text-decoration-none">
+            <Link to="/register" className="text-success text-decoration-none fw-medium">
               Register
             </Link>
-          </p>  */}
+          </p> */}
           <p className="mb-0">
-            <Link to="/reset-password" className="text-decoration-none">
+            <Link to="/reset-password" className="text-success text-decoration-none fw-medium">
               Forgot password?
             </Link>
           </p>

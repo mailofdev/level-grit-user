@@ -1,6 +1,46 @@
 @import './styles/overrides/overrides.css';
 @import './styles/themes/variables.css';
 
+
+.white-text{
+  color: white !important;
+}
+.br-light-green-2{
+  border: 2px solid #3ce479 !important;
+}
+.bg-button{
+  background-color: #37d399 !important;
+}
+.bg-gray{
+  background-color: #f7f8f8 !important;
+}
+.br-light-orange{
+  border: 2px solid #fde997 !important;
+}
+.bg-light-orange{
+  background-color: #fffbeb !important;
+}
+
+.br-light-gray-dotted{
+  border: 2px solid #bababb !important;
+border-style: dotted !important;
+}
+
+.br-light-gray{
+  border: 2px solid #bababb !important;
+}
+.bg-light-gray{
+  background-color: #f9fafb !important;
+}
+.br-light-green{
+  border: 2px solid #bdf7d1 !important;
+}
+.bg-light-green{
+  background-color: #f1fdf4 !important;
+}
+.card-body{
+  background-color: unset !important;
+}
 .cursor-not-allowed {
   cursor:not-allowed !important;
 }

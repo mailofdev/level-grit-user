@@ -2,13 +2,13 @@ const routes = [
   // {
   //   label: 'Dashboard',
   //   href: '/dashboard',
-  //   icon: 'bi-speedometer2', // Dashboard overview
+  //   icon: 'bi-speedometer2',  
   //   showIn: ['sidebar', 'topbar'],
   // },
   // {
   //   label: 'View clients',
-  //   href: '/clients',
-  //   icon: 'bi-people-fill', // Multiple clients
+  //   href: '/AllClients',
+  //   icon: 'bi-people-fill', 
   //   showIn: ['sidebar', 'topbar'],
   // }
 ];

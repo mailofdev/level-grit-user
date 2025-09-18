@@ -337,8 +337,8 @@ code {
 
 /* Ensure all divs inherit theme */
 div {
-  background-color: inherit;
-  color: inherit;
+  /* background-color: inherit; */
+  /* color: inherit; */
 }
 
 /* Ensure all spans inherit theme */

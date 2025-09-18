@@ -1,35 +1,18 @@
 import React, { useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { 
+  // useLocation,
+   useNavigate } from "react-router-dom";
 import DynamicForm from "../../components/forms/DynamicForm";
-import logo from "../../assets/images/logo.png";
 import Heading from "../../components/navigation/Heading";
-
+import { registerUser } from "../../api/authAPI";
+import Loader from "../../components/display/Loader";
 const RegisterClientForm = () => {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { selectedClient } = location.state || {};
+  // const location = useLocation();
+  // const { selectedClient } = location.state || {};
 
   const schema = [
-    {
-    type: "disabledInput",
-    name: "trainerName",
-    label: "Trainer Name",
-    value: selectedClient?.name || ""
-  },
-    {
-      type: "input",
-      name: "firstName",
-      label: "First Name",
-      required: true,
-      minLength: 3,
-    },
-    {
-      type: "input",
-      name: "lastName",
-      label: "Last Name",
-      required: true,
-      minLength: 3,
-    },
+    { type: "input", name: "fullName", label: "Full Name", required: true },
     { type: "email", name: "email", label: "Email", required: true },
     {
       type: "password",
@@ -57,28 +40,23 @@ const RegisterClientForm = () => {
     },
   ];
 
-
-const [formData, setFormData] = useState(() => ({
-  trainerName: selectedClient?.name || ""
-}));
-
-  const [errorMessage, setErrorMessage] = useState("");
+  const [formData, setFormData] = useState({});
   const [loading, setLoading] = useState(false);
+  const [alertData, setAlertData] = useState({
+    show: false,
+    type: "",
+    message: "",
+  });
 
   const handleSubmit = async (data) => {
-    const formData = { ...data, role: "client" };
-    console.log("Form submitted:", formData);
-    setErrorMessage("");
+    const formData = { ...data, role: 0 };
     setLoading(true);
     try {
-      // Example API call
-      // await registerUser(formData);
-      alert("✅ Registration successful!");
-      navigate(-1);
+      await registerUser(formData);
+      setLoading(false);
+      showAlert("success", "✅ Registration successful!");
     } catch (error) {
-      setErrorMessage(
-        error.message || "Registration failed. Please try again."
-      );
+      showAlert("danger", error.message || "❌ Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -86,23 +64,27 @@ const [formData, setFormData] = useState(() => ({
 
   const handleCancel = () => {
     setFormData({});
-    setErrorMessage("");
+    setAlertData({ show: false, type: "", message: "" });
+  };
+
+  const showAlert = (type, message) => {
+    setAlertData({ show: true, type, message });
+    setTimeout(() => {
+      setAlertData({ show: false, type: "", message: "" });
+      if (type === "success") {
+        navigate(-1);
+      }
+    }, 3000);
   };
 
   return (
-    <div
-      className="d-flex justify-content-center align-items-center vh-100"
-      style={{ borderRadius: "10px" }}
-    >
-      <div
-        className="card p-4 shadow-sm"
-        style={{ maxWidth: "500px", width: "100%" }}
-      >
+    <>
+ <div className="container-fluid px-2 px-md-4">
+    {loading && <Loader fullScreen={true} text="Logging in..." color="#FF5733" />} 
+      <div className="m-2 p-2 bg-white rounded shadow-sm">
         <Heading pageName="Register Client" sticky={true} />
         <br />
-        {errorMessage && (
-          <div className="alert alert-danger py-2">{errorMessage}</div>
-        )}
+<div style={{ marginTop: "20px" }}></div>
         <DynamicForm
           schema={schema}
           formData={formData}
@@ -114,7 +96,14 @@ const [formData, setFormData] = useState(() => ({
           twoRowForm={false}
         />
       </div>
-    </div>
+
+      {alertData.show && (
+        <div className={`alert alert-${alertData.type} top-0 end-0 m-3`} role="alert">
+          {alertData.message}
+        </div>
+      )}
+</div>
+    </>
   );
 };
 

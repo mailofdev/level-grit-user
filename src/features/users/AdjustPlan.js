@@ -9,14 +9,14 @@ import {
   Card,
   Accordion,
 } from "react-bootstrap";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaPlus, FaMinus } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Heading from "../../components/navigation/Heading";
 
 export default function AdjustPlan() {
   const navigate = useNavigate();
   const [meals, setMeals] = useState(
-    Array.from({ length: 6 }, () => ({
+    Array.from({ length: 4 }, () => ({
       name: "",
       protein: "",
       fats: "",
@@ -27,21 +27,31 @@ export default function AdjustPlan() {
   );
   const [showPreview, setShowPreview] = useState(false);
 
-  // ✅ Handle input change
   const handleChange = (index, field, value) => {
     const updatedMeals = [...meals];
     updatedMeals[index] = { ...updatedMeals[index], [field]: value };
     setMeals(updatedMeals);
   };
 
-  // ✅ Save handler
+  const handleAddMeal = () => {
+    setMeals([
+      ...meals,
+      { name: "", protein: "", fats: "", carbs: "", calories: "", meal: "" },
+    ]);
+  };
+
+  const handleRemoveMeal = () => {
+    if (meals.length > 1) {
+      setMeals(meals.slice(0, -1));
+    }
+  };
+
   const handleSave = () => {
-    console.log("Saved meals:", meals);
     alert("Plan saved successfully ✅ (check console for data)");
+    console.log(meals);
     navigate(-1);
   };
 
-  // ✅ Calculate totals for preview
   const totals = meals.reduce(
     (acc, meal) => {
       acc.protein += Number(meal.protein) || 0;
@@ -55,18 +65,26 @@ export default function AdjustPlan() {
 
   return (
     <div className="container py-4">
-      {/* Header */}
       <Heading pageName="Adjust Plan" sticky={true} />
-      {/* Meals Form */}
-      <Card className="shadow-sm border-0 rounded-4 p-4">
+
+      <div className="d-flex justify-content-end gap-2 my-3 flex-wrap">
+        <Button variant="outline-primary" onClick={handleAddMeal} className="rounded-pill">
+          <FaPlus /> Add Meal
+        </Button>
+        <Button variant="outline-danger" onClick={handleRemoveMeal} className="rounded-pill">
+          <FaMinus /> Remove Meal
+        </Button>
+      </div>
+
+      <Card className="shadow-sm border-0 rounded-4 p-4 bg-white">
         <Form>
           <Accordion alwaysOpen>
             {meals.map((meal, index) => (
               <Accordion.Item eventKey={index.toString()} key={index}>
                 <Accordion.Header>🍽️ Meal {index + 1}</Accordion.Header>
                 <Accordion.Body>
-                  <Row className="mb-3">
-                    <Col md={4}>
+                  <Row className="mb-3 gx-3 gy-3">
+                    <Col md={4} xs={12}>
                       <Form.Group>
                         <Form.Label>Meal Name</Form.Label>
                         <Form.Control
@@ -76,10 +94,11 @@ export default function AdjustPlan() {
                             handleChange(index, "name", e.target.value)
                           }
                           placeholder="e.g., Pre-Workout"
+                          className="rounded-pill"
                         />
                       </Form.Group>
                     </Col>
-                    <Col md={2}>
+                    <Col md={2} xs={6}>
                       <Form.Group>
                         <Form.Label>Protein (g)</Form.Label>
                         <Form.Control
@@ -88,10 +107,11 @@ export default function AdjustPlan() {
                           onChange={(e) =>
                             handleChange(index, "protein", e.target.value)
                           }
+                          className="rounded-pill"
                         />
                       </Form.Group>
                     </Col>
-                    <Col md={2}>
+                    <Col md={2} xs={6}>
                       <Form.Group>
                         <Form.Label>Fats (g)</Form.Label>
                         <Form.Control
@@ -100,10 +120,11 @@ export default function AdjustPlan() {
                           onChange={(e) =>
                             handleChange(index, "fats", e.target.value)
                           }
+                          className="rounded-pill"
                         />
                       </Form.Group>
                     </Col>
-                    <Col md={2}>
+                    <Col md={2} xs={6}>
                       <Form.Group>
                         <Form.Label>Carbs (g)</Form.Label>
                         <Form.Control
@@ -112,10 +133,11 @@ export default function AdjustPlan() {
                           onChange={(e) =>
                             handleChange(index, "carbs", e.target.value)
                           }
+                          className="rounded-pill"
                         />
                       </Form.Group>
                     </Col>
-                    <Col md={2}>
+                    <Col md={2} xs={6}>
                       <Form.Group>
                         <Form.Label>Calories (kcal)</Form.Label>
                         <Form.Control
@@ -124,12 +146,13 @@ export default function AdjustPlan() {
                           onChange={(e) =>
                             handleChange(index, "calories", e.target.value)
                           }
+                          className="rounded-pill"
                         />
                       </Form.Group>
                     </Col>
                   </Row>
-                  <Form.Group>
-                    <Form.Label>Meal</Form.Label>
+                  <Form.Group className="mb-3">
+                    <Form.Label>Meal Instructions</Form.Label>
                     <Form.Control
                       as="textarea"
                       rows={2}
@@ -138,6 +161,7 @@ export default function AdjustPlan() {
                         handleChange(index, "meal", e.target.value)
                       }
                       placeholder="e.g., Eat with salad and lemon water"
+                      className="rounded-3"
                     />
                   </Form.Group>
                 </Accordion.Body>
@@ -145,19 +169,18 @@ export default function AdjustPlan() {
             ))}
           </Accordion>
 
-          {/* Buttons */}
-          <div className="d-flex justify-content-end gap-3 mt-3">
-            <Button variant="outline-secondary" onClick={() => navigate(-1)}>
+          <div className="d-flex justify-content-end gap-3 mt-4 flex-wrap">
+            <Button variant="outline-secondary" onClick={() => navigate(-1)} className="rounded-pill px-4">
               Cancel
             </Button>
             <Button
               variant="info"
-              className="text-white"
+              className="text-white rounded-pill px-4"
               onClick={() => setShowPreview(true)}
             >
               Preview
             </Button>
-            <Button variant="success" onClick={handleSave}>
+            <Button variant="success" onClick={handleSave} className="rounded-pill px-4">
               Save Plan
             </Button>
           </div>
@@ -184,7 +207,7 @@ export default function AdjustPlan() {
                 <th>Fats (g)</th>
                 <th>Carbs (g)</th>
                 <th>Calories (kcal)</th>
-                <th>Meal</th>
+                <th>Meal Instructions</th>
               </tr>
             </thead>
             <tbody>
@@ -211,7 +234,7 @@ export default function AdjustPlan() {
           </Table>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={() => setShowPreview(false)}>
+          <Button variant="secondary" onClick={() => setShowPreview(false)} className="rounded-pill">
             Close
           </Button>
         </Modal.Footer>
