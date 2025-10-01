@@ -1,22 +1,32 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaPaperPlane } from "react-icons/fa";
-import { Card, Form, InputGroup, Button } from "react-bootstrap";
+import { Form, InputGroup, Button } from "react-bootstrap";
 import Heading from "../../components/navigation/Heading";
+import { useLocation } from "react-router-dom";
+import { sendMessage, subscribeToMessages } from "../../config/chatService";
 
 export default function Messages() {
-  const [messages, setMessages] = useState([
-    { id: 1, text: "Hello! How are you?", sender: "other" },
-    { id: 2, text: "I'm good, thanks! How about you?", sender: "me" },
-    { id: 3, text: "Doing well!", sender: "other" },
-  ]);
+  const location = useLocation();
+  const trainer = location.state?.trainer;
+  const client = location.state?.client;   
+  const trainerId = trainer?.trainerId;
+  const clientId = client?.clientId;
+
+  const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const messagesEndRef = useRef(null);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (newMessage.trim() === "") return;
+  useEffect(() => {
+    if (!trainerId || !clientId) return;
+    const unsubscribe = subscribeToMessages(trainerId, clientId, setMessages);
+    return () => unsubscribe();
+  }, [trainerId, clientId]);
 
-    setMessages([...messages, { id: Date.now(), text: newMessage, sender: "me" }]);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
+    await sendMessage(trainerId, clientId, clientId, newMessage.trim());
     setNewMessage("");
   };
 
@@ -24,46 +34,79 @@ export default function Messages() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  if (!trainer) {
+    return (
+      <p className="text-muted mt-4 text-center">
+        Select a trainer to view messages.
+      </p>
+    );
+  }
+
   return (
-    <div className="container mt-3 d-flex flex-column vh-100">
-      <Heading pageName="Chat" sticky={true} />
+    <div className="container">
+      <Heading pageName={`Chat with ${trainer.fullName}`} sticky={true} />
 
-      {/* Chat area */}
-      <div className="flex-grow-1 overflow-auto p-3 my-2 shadow-md rounded" style={{ backgroundColor: "#f1f3f5" }}>
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`d-flex mb-3 ${msg.sender === "me" ? "justify-content-end" : "justify-content-start"}`}
-          >
+      <div
+        className="d-flex flex-column"
+        style={{ height: "calc(100vh - 160px)" }}
+      >
+        <div
+          className="flex-grow-1 overflow-auto p-3 rounded shadow-sm"
+          style={{ backgroundColor: "#ece5dd" }}
+        >
+          {messages.map((msg) => (
             <div
-              className={`p-3 rounded-3 shadow-sm ${
-                msg.sender === "me" ? "bg-primary white-text" : "bg-white border"
+              key={msg.id}
+              className={`d-flex mb-2 ${
+                msg.senderId === clientId
+                  ? "justify-content-end"
+                  : "justify-content-start"
               }`}
-              style={{ maxWidth: "75%", wordBreak: "break-word" }}
             >
-              {msg.text}
+              <div
+                className="p-2 rounded-3 shadow-sm"
+                style={{
+                  maxWidth: "70%",
+                  backgroundColor:
+                    msg.senderId === clientId ? "#d1f7c4" : "#fff",
+                }}
+              >
+                <div>{msg.text}</div>
+                <div className="text-end" style={{ fontSize: 12 }}>
+                  <small className="text-muted">
+                    {msg.timestamp?.toDate().toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </small>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
-        <div ref={messagesEndRef} />
-      </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
 
-      {/* Input area – sticky to bottom */}
-      <Card className="border-0 shadow-sm rounded sticky-bottom my-3 bg-light">
-        <Form onSubmit={handleSubmit}>
-          <InputGroup className="p-3 ">
-            <Form.Control
-              placeholder="Type a message..."
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              className="border-0"
-            />
-            <Button type="submit" variant="primary" className="rounded-circle px-3">
-              <FaPaperPlane />
-            </Button>
-          </InputGroup>
-        </Form>
-      </Card>
+        <div className="p-3 rounded mt-2 bg-light shadow-sm">
+          <Form onSubmit={handleSubmit}>
+            <InputGroup>
+              <Form.Control
+                placeholder="Type a message"
+                value={newMessage}
+                onChange={(e) => setNewMessage(e.target.value)}
+                className="rounded-pill border-0 bg-light px-3"
+              />
+              <Button
+                type="submit"
+                variant="success"
+                className="rounded-circle ms-2"
+                style={{ width: "45px", height: "45px" }}
+              >
+                <FaPaperPlane />
+              </Button>
+            </InputGroup>
+          </Form>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,8 +1,8 @@
 const routes = [
   // {
-  //   label: 'Dashboard',
-  //   href: '/dashboard',
-  //   icon: 'bi-speedometer2',  
+  //   label: 'Messages',
+  //   href: '/messages',
+  //   icon: 'bi-speedometer2',
   //   showIn: ['sidebar', 'topbar'],
   // },
   // {

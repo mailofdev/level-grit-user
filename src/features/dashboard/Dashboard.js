@@ -11,13 +11,43 @@ import {
   FaBell,
 } from "react-icons/fa";
 import logo from "../../assets/images/ss1.png";
+import { useNavigate } from "react-router-dom";
+import { FaMessage } from "react-icons/fa6";
+
 const Dashboard = () => {
+   const navigate = useNavigate();
   const [showCamera, setShowCamera] = useState(false);
   const [videoStream, setVideoStream] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
+const client = {
+  "clientId": 9,
+  "email": "hrishi@gmail.com",
+  "fullName": "hrishi jadhav",
+  "gender": "male",
+    "phoneNumber": "9922328647",
+    "dateOfBirth": "1995-04-28T05:30:00",
+    "height": 165,
+    "weight": 60,
+    "targetWeight": 77,
+    "goal": 0,
+    "trainerId": "12345"
+  };
 
+  const trainer = {
+  "clientId": 9,
+  "email": "hrishi@gmail.com",
+  "fullName": "hrishi jadhav",
+  "gender": "male",
+    "phoneNumber": "9922328647",
+    "dateOfBirth": "1995-04-28T05:30:00",
+    "height": 165,
+    "weight": 60,
+    "targetWeight": 77,
+    "goal": 0,
+    "trainerId": "12345"
+  };
   const meals = [
     {
       name: "Meal 1 (Pre-Workout)",
@@ -530,6 +560,17 @@ const Dashboard = () => {
               View Diet Chart
             </button>
           </div>
+
+ <button
+  className="bg-white btn-sm p-2 d-flex align-items-center border-0 rounded-3 shadow-sm"
+  onClick={() =>
+    navigate(`/messages/${client.clientId}`, {
+      state: { client, trainer },
+    })
+  }
+>
+  <FaMessage className="me-1" /> Message
+</button>
 
           {/* Captured Image Preview */}
           {capturedImage && (

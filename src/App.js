@@ -90,7 +90,7 @@ function App() {
 
 
             <Route
-            path="/messages"
+            path="/messages/:clientId"
             element={
               <ProtectedLayout>
                 <Messages />
