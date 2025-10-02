@@ -13,6 +13,7 @@ import {
 import logo from "../../assets/images/ss1.png";
 import { useNavigate } from "react-router-dom";
 import { FaMessage } from "react-icons/fa6";
+import ImageRecognizer from "../../components/display/ImageRecognizer";
 
 const Dashboard = () => {
    const navigate = useNavigate();
@@ -428,11 +429,9 @@ const client = {
                         style={{ height: "120px" }}
                       >
                         {meal.image ? (
-                          <img
-                            src={meal.image}
-                            alt={meal.name}
-                            className="img-fluid w-100 h-100 object-fit-cover"
-                          />
+                          <div className="my-2">
+                            <ImageRecognizer imageSrc={meal.image} mode="mobilenet" />
+                          </div>
                         ) : (
                           <div className="d-flex flex-column align-items-center justify-content-center h-100 text-center text-muted">
                             <FaCamera className="fs-2 mb-2" />
@@ -573,56 +572,62 @@ const client = {
 </button>
 
           {/* Captured Image Preview */}
-          {capturedImage && (
-            <div className="card border-0 shadow-sm mb-4">
-              <div className="card-body text-center">
-                <h5 className="card-title mb-3">Captured Image</h5>
-                <img
-                  src={capturedImage}
-                  alt="Captured"
-                  className="img-fluid rounded shadow-sm"
-                  style={{ maxHeight: "400px" }}
-                />
-              </div>
-            </div>
-          )}
+
+{capturedImage && (
+  <div className="card border-0 shadow-sm mb-4">
+    <div className="card-body text-center">
+      <h5 className="card-title mb-3">Captured Image</h5>
+      <img
+        src={capturedImage}
+        alt="Captured"
+        className="img-fluid rounded shadow-sm"
+        style={{ maxHeight: "400px" }}
+      />
+      {/* Image recognition */}
+      <ImageRecognizer imageSrc={capturedImage} mode="coco-ssd" />
+    </div>
+  </div>
+)}
+
         </div>
       </div>
 
       {/* Camera Overlay */}
-      {showCamera && (
-        <div
-          className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-          style={{ backgroundColor: "rgba(0,0,0,0.8)", zIndex: 9999 }}
+     {showCamera && (
+  <div
+    className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
+    style={{ backgroundColor: "rgba(0,0,0,0.8)", zIndex: 9999 }}
+  >
+    <div className="text-center">
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        className="rounded shadow-lg"
+        style={{ maxWidth: "90vw", maxHeight: "60vh" }}
+      />
+      <div className="d-flex justify-content-center mb-2">
+        <button
+          onClick={handleCapture}
+          className="btn btn-success btn-sm me-3"
         >
-          <div className="text-center">
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              className="rounded shadow-lg"
-              style={{ maxWidth: "90vw", maxHeight: "60vh" }}
-            />
-            <div className="d-flex justify-content-center mb-2">
-              <button
-                onClick={handleCapture}
-                className="btn btn-success btn-sm me-3"
-              >
-                <FaCamera className="me-2" />
-                Capture
-              </button>
-              <button
-                onClick={handleCloseCamera}
-                className="btn btn-danger btn-sm"
-              >
-                <FaTimes className="me-2" />
-                Close
-              </button>
-            </div>
-          </div>
-          <canvas ref={canvasRef} style={{ display: "none" }} />
-        </div>
-      )}
+          <FaCamera className="me-2" /> Capture
+        </button>
+        <button
+          onClick={handleCloseCamera}
+          className="btn btn-danger btn-sm"
+        >
+          <FaTimes className="me-2" /> Close
+        </button>
+      </div>
+
+      {/* Live detection */}
+      <ImageRecognizer videoRef={videoRef} mode="coco-ssd" />
+    </div>
+    <canvas ref={canvasRef} style={{ display: "none" }} />
+  </div>
+)}
+
     </div>
   );
 };
