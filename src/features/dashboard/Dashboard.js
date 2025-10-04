@@ -33,7 +33,6 @@ const client = {
     "weight": 60,
     "targetWeight": 77,
     "goal": 0,
-    "trainerId": "12345"
   };
 
   const trainer = {
