@@ -15,7 +15,7 @@ import { useNavigate } from "react-router-dom";
 import { FaMessage } from "react-icons/fa6";
 import ImageRecognizer from "../../components/display/ImageRecognizer";
 
-const Dashboard = () => {
+const ClientDashboard = () => {
    const navigate = useNavigate();
   const [showCamera, setShowCamera] = useState(false);
   const [videoStream, setVideoStream] = useState(null);
@@ -631,4 +631,4 @@ const client = {
   );
 };
 
-export default Dashboard;
+export default ClientDashboard;

@@ -6,7 +6,6 @@ import ProtectedRoute from "./components/navigation/ProtectedRoute";
 
 import MainLayout from "./layouts/MainLayout";
 import NotFound from "./features/errors/NotFound";
-import Dashboard from "./features/dashboard/Dashboard";
 import LoginForm from "./features/auth/LoginForm";
 import RegisterForm from "./features/auth/RegisterForm";
 import ResetPasswordForm from "./features/auth/ResetPasswordForm";
@@ -17,6 +16,7 @@ import UserDetails from "./features/users/UserDetails";
 import RegisterClientForm from "./features/auth/RegisterClientForm";
 import AllClients from "./features/users/AllClients";
 import ClientDetails from "./features/users/ClientDetails";
+import ClientDashboard from "./features/dashboard/ClientDashboard";
 
 function ProtectedLayout({ children, config }) {
   return (
@@ -43,7 +43,7 @@ function App() {
             path="/dashboard"
             element={
               <ProtectedLayout config={{ showTopbar: true, showSidebar: false, showFooter: false }}>
-                <Dashboard />
+                <ClientDashboard />
               </ProtectedLayout>
             }
           />
