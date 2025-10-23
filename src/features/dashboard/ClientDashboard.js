@@ -1,53 +1,31 @@
-import React, { useState, useRef, useEffect } from "react";
+import React from "react";
+import { ProgressBar } from "react-bootstrap";
+
+import { useNavigate, useLocation } from "react-router-dom";
+import Heading from "../../components/navigation/Heading";
 import {
   FaFire,
-  FaWater,
   FaCheckCircle,
-  FaTimes,
   FaCamera,
+  FaSadCry,
   FaShareAlt,
-  FaAppleAlt,
-  FaClock,
-  FaBell,
 } from "react-icons/fa";
-import logo from "../../assets/images/ss1.png";
-import { useNavigate } from "react-router-dom";
 import { FaMessage } from "react-icons/fa6";
-import ImageRecognizer from "../../components/display/ImageRecognizer";
+import { SplitButton } from "primereact/splitbutton";
 
-const ClientDashboard = () => {
-   const navigate = useNavigate();
-  const [showCamera, setShowCamera] = useState(false);
-  const [videoStream, setVideoStream] = useState(null);
-  const [capturedImage, setCapturedImage] = useState(null);
-  const videoRef = useRef(null);
-  const canvasRef = useRef(null);
-const client = {
-  "clientId": 9,
-  "email": "hrishi@gmail.com",
-  "fullName": "hrishi jadhav",
-  "gender": "male",
-    "phoneNumber": "9922328647",
-    "dateOfBirth": "1995-04-28T05:30:00",
-    "height": 165,
-    "weight": 60,
-    "targetWeight": 77,
-    "goal": 0,
-  };
+export default function ClientDashboard() {
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const trainer = {
-  "clientId": 9,
-  "email": "hrishi@gmail.com",
-  "fullName": "hrishi jadhav",
-  "gender": "male",
-    "phoneNumber": "9922328647",
-    "dateOfBirth": "1995-04-28T05:30:00",
-    "height": 165,
-    "weight": 60,
-    "targetWeight": 77,
-    "goal": 0,
-    "trainerId": "12345"
-  };
+  const client = { ...location.state?.client };
+console.table(client);
+  if (!client)
+    return (
+      <p className="text-muted mt-4 text-center">
+        Select a client to view details.
+      </p>
+    );
+
   const meals = [
     {
       name: "Meal 1 (Pre-Workout)",
@@ -148,64 +126,6 @@ const client = {
       goal: 8,
     },
   };
-
-  useEffect(() => {
-    if (videoRef.current && videoStream) {
-      videoRef.current.srcObject = videoStream;
-    }
-  }, [videoStream]);
-
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "My Fitness Streak",
-          text: `I'm on a ${dashboardData.user.streak}-day fitness streak! 💪🔥`,
-        });
-      } catch (error) {
-        console.error("Share failed", error);
-      }
-    } else {
-      alert("Share not supported");
-    }
-  };
-
-  const handleMealClick = async () => {
-    if (navigator.mediaDevices?.getUserMedia) {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
-        });
-        setVideoStream(stream);
-        setShowCamera(true);
-      } catch (err) {
-        alert("Camera access denied");
-      }
-    } else {
-      alert("Camera not supported");
-    }
-  };
-
-  const handleCapture = () => {
-    if (videoRef.current && canvasRef.current) {
-      const video = videoRef.current;
-      const canvas = canvasRef.current;
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-      canvas.getContext("2d").drawImage(video, 0, 0);
-      setCapturedImage(canvas.toDataURL("image/png"));
-      video.srcObject.getTracks().forEach((track) => track.stop());
-      setShowCamera(false);
-    }
-  };
-
-  const handleCloseCamera = () => {
-    if (videoRef.current?.srcObject) {
-      videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
-    }
-    setShowCamera(false);
-  };
-
   const completedMeals = dashboardData.meals.filter((m) => m.completed).length;
   const remainingMeals = dashboardData.meals.length - completedMeals;
 
@@ -267,46 +187,112 @@ const client = {
     );
   };
 
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "My Fitness Streak",
+          text: `I'm on a ${dashboardData.user.streak}-day fitness streak! 💪🔥`,
+        });
+      } catch (error) {
+        console.error("Share failed", error);
+      }
+    } else {
+      alert("Share not supported");
+    }
+  };
+
   return (
-    <div
-      className="container-fluid px-3 py-4 bg-light min-vh-100"
-      style={{ backgroundColor: "#fff !important" }}
-    >
-      {/* <img
-            src={logo}
-            alt="Level Grit Logo"
-            style={{ height: "500px", width: "800px"}}
-          /> */}
-      <div className="row justify-content-center">
-        <div className="col-12 col-xl-10">
-          {/* Welcome Section */}
-          <div
-            className="rounded-4 shadow-sm mb-4 white-text"
-            style={{
-              background: "linear-gradient(90deg, #54d8a3 0%, #039a6c 100%)",
-            }}
-          >
-            <div className="card-body text-center p-4 d-flex align-items-center justify-content-between">
+    <div className="container">
+      {/* <Heading pageName={`${client.fullName}'s information`} sticky={true} /> */}
+      <div
+        className="d-flex flex-column"
+        style={{
+          // height: "calc(100vh - 160px)",
+          // overflow: 'hidden'
+        }}
+      >
+        {/* Client Info Card */}
+        <div className="flex-grow-1 overflow-auto p-3 rounded shadow-sm">
+          <div className="card shadow-sm rounded-4 mb-3 mt-3 border-0">
+            <div className="card-body p-4 d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
               <div>
-                <h3 className="white-text mb-3">
-                  Welcome back, {dashboardData.user.name}! 👋
-                </h3>
-                <p className="white-text mb-3">
-                  Keep pushing towards your goals every day
+                <h4 className="fw-bold">{client.fullName}</h4>
+                <p className="mb-1 text-muted small">
+                  Goal: <span className="fw-semibold">{client.goal}</span> •
+                  Start: {client.startDate}
                 </p>
+                <span
+                  className={`badge px-3 py-2 ${
+                    client.status === "attention" ? "bg-danger" : "bg-success"
+                  }`}
+                >
+                  {client.status === "attention"
+                    ? "Need Attention"
+                    : "On Track"}
+                </span>
               </div>
-              <div className="px-3 py-2">
-                <h1 className="fw-bold white-text">
-                  {dashboardData.user.streak}
-                </h1>
-                <div className="white-text">
-                  Days Streak <FaFire className="me-2 text-warning" />
+
+              <div className="text-md-end mt-3 mt-md-0">
+                <div className="d-flex align-items-center justify-content-md-end mb-3">
+                  <span
+                    className={`fw-bold ${
+                      client.streak === "Missed meal"
+                        ? "text-danger"
+                        : "text-success"
+                    }`}
+                  >
+                    {client.streak}
+                  </span>
+                  {client.streak === "Missed meal" ? (
+                    <FaSadCry className="text-danger ms-2" />
+                  ) : (
+                    <FaFire className="text-success ms-2" />
+                  )}
+                </div>
+                <div className="d-flex flex-wrap gap-2 justify-content-md-end">
+                  <button
+                    className="bg-white fs-6 btn-sm p-2 d-flex align-items-center border-0 rounded-3 shadow-sm"
+                    onClick={() =>
+                      navigate(`/messages/${client.clientId}`, {
+                        state: { client },
+                      })
+                    }
+                  >
+                    <FaMessage className="me-1" /> Message
+                  </button>
+
+                  <SplitButton
+                    label="Plan"
+                    icon="pi pi-plus"
+                    className="bg-button fs-6 text-secondary btn-sm border-0 rounded-3 shadow-sm"
+                    style={{
+                      color: "white",
+                    }}
+                    model={[
+                      {
+                        label: "Add",
+                        icon: "pi pi-pencil",
+                        command: () =>
+                          navigate(`/adjust-plan/${client.clientId}`, {
+                            state: { client, isView: false },
+                          }),
+                      },
+                      {
+                        label: "Preview",
+                        icon: "pi pi-eye",
+                        command: () =>
+                          navigate(`/adjust-plan/${client.clientId}`, {
+                            state: { client, isView: true },
+                          }),
+                      },
+                    ]}
+                  />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Macros and Streak */}
           <div className="row mb-2 bg-gray">
             <div className="col-lg-8 mb-3">
               <div className="card rounded-4  shadow-sm h-100">
@@ -338,6 +324,7 @@ const client = {
               </div>
             </div>
 
+            {/* Macros and Streak */}
             <div className="col-lg-4 mb-3">
               <div className="card rounded-4  shadow-sm h-100">
                 <div className="card-body text-center d-flex flex-column">
@@ -378,7 +365,7 @@ const client = {
             </div>
           </div>
 
-          {/* Meals Section */}
+          {/* Meal Plan Section */}
           <div className="card rounded-4 shadow-sm mb-4">
             <div className="card-body">
               {/* Header */}
@@ -405,10 +392,10 @@ const client = {
                           : "br-light-gray-dotted"
                       }`}
                       style={{
-                        cursor: meal.completed ? "default" : "pointer",
-                        pointerEvents: meal.completed ? "none" : "auto",
+                        cursor: meal.completed ? "default" : "default",
+                        pointerEvents: meal.completed ? "none" : "none",
                       }}
-                      onClick={handleMealClick}
+                      // onClick={handleMealClick}
                     >
                       {/* Checkmark */}
                       {/* {meal.completed && ( */}
@@ -427,15 +414,12 @@ const client = {
                         className="rounded-3 overflow-hidden mb-2"
                         style={{ height: "120px" }}
                       >
-                        {meal.image ? (
-                          <div className="my-2">
-                            <ImageRecognizer imageSrc={meal.image} mode="mobilenet" />
-                          </div>
-                        ) : (
-                          <div className="d-flex flex-column align-items-center justify-content-center h-100 text-center text-muted">
-                            <FaCamera className="fs-2 mb-2" />
-                            <small>Upload meal photo</small>
-                          </div>
+                        {meal.image && (
+                          <img
+                            src={meal.image}
+                            alt={meal.name}
+                            className="img-fluid w-100 h-100 object-fit-cover"
+                          />
                         )}
                       </div>
 
@@ -452,183 +436,8 @@ const client = {
               </div>
             </div>
           </div>
-
-          {/* Reminders and Water Intake */}
-          <div className="row mb-4">
-            {/* Reminders */}
-            <div className="col-lg-7 mb-3">
-              <div className="rounded-4 shadow-sm p-3 h-100 bg-white">
-                <div className="d-flex align-items-center mb-3">
-                  <FaBell className="text-warning me-2 fs-5" />
-                  <h6 className="mb-0 fw-bold">Reminders</h6>
-                </div>
-
-                {dashboardData.reminders.map((reminder, idx) => (
-                  <div
-                    key={idx}
-                    className={`d-flex justify-content-between align-items-center rounded-3 p-3 mb-2 ${
-                      reminder.type === "warning"
-                        ? "bg-warning bg-opacity-25 border-start border-4 border-warning"
-                        : "bg-primary bg-opacity-10 border-start border-4 border-primary"
-                    }`}
-                  >
-                    <div>
-                      <div className="fw-semibold">{reminder.text}</div>
-                      <small className="text-muted">
-                        <FaClock className="me-1" />
-                        {reminder.time} – {reminder.note}
-                      </small>
-                    </div>
-                    <button
-                      className={`btn btn-sm ${
-                        reminder.type === "warning"
-                          ? "btn-link text-warning"
-                          : "btn-link text-primary"
-                      }`}
-                    >
-                      {reminder.type === "warning" ? "Snooze" : "Done"}
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Water Intake */}
-            <div className="col-lg-5 mb-3">
-              <div className="rounded-4 shadow-sm p-3 h-100 bg-white">
-                <h6 className="fw-bold mb-3">Water Intake</h6>
-
-                <div className="text-center mb-3">
-                  <h3 className="text-primary mb-1">
-                    {dashboardData.water.current}
-                    <small className="text-muted fs-6">
-                      {" "}
-                      / {dashboardData.water.goal} glasses
-                    </small>
-                  </h3>
-                </div>
-
-                {/* Progress Bar */}
-                <div className="progress mb-3" style={{ height: "8px" }}>
-                  <div
-                    className="progress-bar bg-primary"
-                    role="progressbar"
-                    style={{
-                      width: `${
-                        (dashboardData.water.current /
-                          dashboardData.water.goal) *
-                        100
-                      }%`,
-                    }}
-                  />
-                </div>
-
-                {/* Glass Circles */}
-                <div className="d-flex justify-content-center flex-wrap mb-4">
-                  {Array.from({ length: dashboardData.water.goal }).map(
-                    (_, idx) => (
-                      <div
-                        key={idx}
-                        className={`rounded-circle me-1 mb-1 ${
-                          idx < dashboardData.water.current
-                            ? "bg-primary"
-                            : "bg-light border"
-                        }`}
-                        style={{ width: "22px", height: "22px" }}
-                      ></div>
-                    )
-                  )}
-                </div>
-
-                {/* Add Glass Button */}
-                <div className="text-center">
-                  <button className="btn btn-success w-100 rounded-pill">
-                    <FaWater className="me-2" />
-                    Add Glass
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Diet Chart Button */}
-          <div className="text-center mb-4">
-            <button className="btn btn-success btn-sm rounded-pill shadow px-4 py-2 fw-semibold">
-              <i className="bi bi-clipboard-check me-2"></i>
-              View Diet Chart
-            </button>
-          </div>
-
- <button
-  className="bg-white btn-sm p-2 d-flex align-items-center border-0 rounded-3 shadow-sm"
-  onClick={() =>
-    navigate(`/messages/${client.clientId}`, {
-      state: { client, trainer },
-    })
-  }
->
-  <FaMessage className="me-1" /> Message
-</button>
-
-          {/* Captured Image Preview */}
-
-{capturedImage && (
-  <div className="card border-0 shadow-sm mb-4">
-    <div className="card-body text-center">
-      <h5 className="card-title mb-3">Captured Image</h5>
-      <img
-        src={capturedImage}
-        alt="Captured"
-        className="img-fluid rounded shadow-sm"
-        style={{ maxHeight: "400px" }}
-      />
-      {/* Image recognition */}
-      <ImageRecognizer imageSrc={capturedImage} mode="coco-ssd" />
-    </div>
-  </div>
-)}
-
         </div>
       </div>
-
-      {/* Camera Overlay */}
-     {showCamera && (
-  <div
-    className="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center"
-    style={{ backgroundColor: "rgba(0,0,0,0.8)", zIndex: 9999 }}
-  >
-    <div className="text-center">
-      <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        className="rounded shadow-lg"
-        style={{ maxWidth: "90vw", maxHeight: "60vh" }}
-      />
-      <div className="d-flex justify-content-center mb-2">
-        <button
-          onClick={handleCapture}
-          className="btn btn-success btn-sm me-3"
-        >
-          <FaCamera className="me-2" /> Capture
-        </button>
-        <button
-          onClick={handleCloseCamera}
-          className="btn btn-danger btn-sm"
-        >
-          <FaTimes className="me-2" /> Close
-        </button>
-      </div>
-
-      {/* Live detection */}
-      <ImageRecognizer videoRef={videoRef} mode="coco-ssd" />
-    </div>
-    <canvas ref={canvasRef} style={{ display: "none" }} />
-  </div>
-)}
-
     </div>
   );
-};
-
-export default ClientDashboard;
+}
