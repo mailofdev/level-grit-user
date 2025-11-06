@@ -22,6 +22,28 @@ const LandingPage = () => {
   const [showInstallButton, setShowInstallButton] = useState(false);
 
   useEffect(() => {
+    // Check if app is already installed
+    const checkIfInstalled = () => {
+      return window.matchMedia("(display-mode: standalone)").matches || 
+             (window.navigator.standalone === true) ||
+             document.referrer.includes('android-app://');
+    };
+
+    if (checkIfInstalled()) {
+      setShowInstallButton(false);
+      return;
+    }
+
+    // Check if we're on a supported platform/browser
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
+    const isEdge = /Edg/.test(navigator.userAgent);
+    const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
+    const isFirefox = /Firefox/.test(navigator.userAgent);
+    
+    const isSupportedPlatform = isMobile || isChrome || isEdge || isSafari || isFirefox;
+
+    // Handler for beforeinstallprompt event (primary method)
     const handler = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -30,25 +52,74 @@ const LandingPage = () => {
 
     window.addEventListener("beforeinstallprompt", handler);
 
-    // Check if app is already installed
-    if (window.matchMedia("(display-mode: standalone)").matches) {
-      setShowInstallButton(false);
-    }
+    // Fallback: Check if PWA is installable and show button
+    const checkInstallability = () => {
+      if (checkIfInstalled()) {
+        setShowInstallButton(false);
+        return;
+      }
 
-    return () => window.removeEventListener("beforeinstallprompt", handler);
+      // Check if service worker is registered (PWA requirement)
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistration().then((registration) => {
+          if (registration && isSupportedPlatform) {
+            // Service worker is registered and platform is supported
+            // Show button as fallback (beforeinstallprompt might not fire immediately)
+            setShowInstallButton(true);
+          }
+        }).catch(() => {
+          // If service worker check fails but platform is supported, still show button
+          // (user might be able to install via browser menu)
+          if (isSupportedPlatform && (isMobile || isSafari)) {
+            setShowInstallButton(true);
+          }
+        });
+      } else if (isSupportedPlatform && (isMobile || isSafari)) {
+        // Even without service worker check, show button on mobile/Safari
+        // (they have manual install options)
+        setShowInstallButton(true);
+      }
+    };
+
+    // Check installability after delays to allow service worker registration
+    const timeoutId1 = setTimeout(checkInstallability, 500);
+    const timeoutId2 = setTimeout(checkInstallability, 2000);
+
+    return () => {
+      window.removeEventListener("beforeinstallprompt", handler);
+      clearTimeout(timeoutId1);
+      clearTimeout(timeoutId2);
+    };
   }, []);
 
   const handleInstallClick = async () => {
-    if (!deferredPrompt) return;
-
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    
-    if (outcome === "accepted") {
-      setShowInstallButton(false);
+    if (deferredPrompt) {
+      // Use the deferred prompt if available (Android Chrome, Edge, etc.)
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      
+      if (outcome === "accepted") {
+        setShowInstallButton(false);
+      }
+      
+      setDeferredPrompt(null);
+    } else {
+      // Fallback for browsers that don't support beforeinstallprompt
+      // Show instructions or try alternative methods
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const isAndroid = /Android/.test(navigator.userAgent);
+      
+      if (isIOS) {
+        // iOS Safari - show instructions
+        alert('To install this app:\n1. Tap the Share button\n2. Select "Add to Home Screen"');
+      } else if (isAndroid) {
+        // Android - try to trigger install via manifest
+        alert('To install this app, look for the "Add to Home Screen" option in your browser menu.');
+      } else {
+        // Desktop browsers
+        alert('To install this app, look for the install icon in your browser\'s address bar.');
+      }
     }
-    
-    setDeferredPrompt(null);
   };
 
   const handleSignInNavigation = () => navigate("/login");

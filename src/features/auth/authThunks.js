@@ -14,6 +14,12 @@ export const loginThunk = createAsyncThunk(
         throw new Error("Invalid response from server. Please try again.");
       }
 
+      // Validate role - only allow clients to login
+      const userRole = result?.userInfo?.role || result?.role;
+      if (!userRole || userRole.toLowerCase() !== "client") {
+        throw new Error("Access denied. Only clients can login to this application.");
+      }
+
       // Combine all auth info
       const authData = {
         accessToken: result.token,
