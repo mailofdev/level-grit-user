@@ -1,20 +1,29 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaPaperPlane, FaSmile } from "react-icons/fa";
 import { Form, InputGroup, Button, Card } from "react-bootstrap";
+import { motion, AnimatePresence } from "framer-motion";
 import EmojiPicker from "emoji-picker-react";
 import Heading from "../../components/navigation/Heading";
 import { useLocation } from "react-router-dom";
 import { sendMessage, subscribeToMessages } from "../../config/chatService";
+import { getDecryptedUser } from "../../components/common/CommonFunctions";
 import Loader from "../../components/display/Loader";
 
 export default function Messages({ isTrainer = false }) {
   const location = useLocation();
   const client = location.state?.client;
   const trainer = location.state?.trainer;
+  const loggedInUser = getDecryptedUser();
 
   // Trainer & Client IDs depend on who is logged in
-  const trainerId = isTrainer ? client?.trainerId : trainer?.trainerId;
-  const clientId = isTrainer ? client?.clientId : client?.clientId;
+  // When isTrainer is true: trainerId = logged-in trainer's ID, clientId = selected client's ID
+  // When isTrainer is false: trainerId = selected trainer's ID, clientId = logged-in client's ID
+  const trainerId = isTrainer 
+    ? (loggedInUser?.userId || loggedInUser?.id || loggedInUser?.trainerId)
+    : (trainer?.trainerId || trainer?.userId || trainer?.id);
+  const clientId = isTrainer 
+    ? (client?.clientId || client?.userId || client?.id)
+    : (loggedInUser?.userId || loggedInUser?.clientId || loggedInUser?.id);
 
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -24,8 +33,17 @@ export default function Messages({ isTrainer = false }) {
 
   // Fetch messages
   useEffect(() => {
-    if (!trainerId || !clientId) return;
+    if (!trainerId || !clientId) {
+      console.log("Missing IDs for messages:", { trainerId, clientId, isTrainer, client, trainer, loggedInUser });
+      if (trainerId && clientId) {
+        setLoading(false);
+      }
+      return;
+    }
+    
+    console.log("Subscribing to messages (trainer view):", { trainerId, clientId });
     const unsubscribe = subscribeToMessages(trainerId, clientId, (msgs) => {
+      console.log("Received messages (trainer view):", msgs);
       setMessages(msgs);
       setLoading(false);
     });
@@ -35,10 +53,15 @@ export default function Messages({ isTrainer = false }) {
   // Send message
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
+    if (!newMessage.trim() || !trainerId || !clientId) return;
     const senderId = isTrainer ? trainerId : clientId;
-    await sendMessage(trainerId, clientId, senderId, newMessage.trim());
-    setNewMessage("");
+    console.log("Sending message (trainer view):", { trainerId, clientId, senderId, message: newMessage.trim() });
+    try {
+      await sendMessage(trainerId, clientId, senderId, newMessage.trim());
+      setNewMessage("");
+    } catch (err) {
+      console.error("Error sending message:", err);
+    }
   };
 
   // Scroll to bottom
@@ -71,14 +94,20 @@ export default function Messages({ isTrainer = false }) {
     <div className="container py-3">
       <Heading pageName={chatName} sticky={true} />
 
-      <Card
-        className="border-0 shadow-lg d-flex flex-column"
-        style={{
-          height: "calc(100vh - 160px)",
-          borderRadius: "16px",
-          overflow: "hidden",
-        }}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
       >
+        <Card
+          className="border-0 shadow-lg d-flex flex-column mb-5"
+          style={{
+            height: "calc(100vh - 160px)",
+            borderRadius: "16px",
+            overflow: "hidden",
+            background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)"
+          }}
+        >
         {/* Chat Messages */}
         <div
           className="flex-grow-1 overflow-auto p-3"
@@ -92,99 +121,138 @@ export default function Messages({ isTrainer = false }) {
               <p>No messages yet. Start the conversation! 💬</p>
             </div>
           ) : (
-            messages.map((msg) => {
-              const isSender = msg.senderId === (isTrainer ? trainerId : clientId);
-              return (
-                <div
-                  key={msg.id}
-                  className={`d-flex mb-2 ${
-                    isSender ? "justify-content-end" : "justify-content-start"
-                  }`}
-                >
-                  <div
-                    className="p-3 rounded-4 shadow-sm"
-                    style={{
-                      maxWidth: "70%",
-                      wordBreak: "break-word",
-                      backgroundColor: isSender ? "#d1f7c4" : "#ffffff",
-                      borderRadius: isSender
-                        ? "20px 20px 0 20px"
-                        : "20px 20px 20px 0",
-                    }}
+            <AnimatePresence>
+              {messages.map((msg, idx) => {
+                const isSender = msg.senderId === (isTrainer ? trainerId : clientId);
+                return (
+                  <motion.div
+                    key={msg.id}
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.3, delay: idx * 0.05 }}
+                    className={`d-flex mb-3 ${
+                      isSender ? "justify-content-end" : "justify-content-start"
+                    }`}
                   >
-                    <div style={{ fontSize: "0.95rem" }}>{msg.text}</div>
-                    <div
-                      className="text-end text-muted"
-                      style={{ fontSize: "0.75rem", marginTop: "4px" }}
+                    <motion.div
+                      className="p-3 rounded-4 shadow-sm"
+                      style={{
+                        maxWidth: "70%",
+                        wordBreak: "break-word",
+                        backgroundColor: isSender 
+                          ? "linear-gradient(135deg, #007AFF 0%, #0056b3 100%)" 
+                          : "#ffffff",
+                        background: isSender 
+                          ? "linear-gradient(135deg, #007AFF 0%, #0056b3 100%)" 
+                          : "#ffffff",
+                        borderRadius: isSender
+                          ? "20px 20px 0 20px"
+                          : "20px 20px 20px 0",
+                        border: isSender ? "none" : "1px solid rgba(0,0,0,0.1)"
+                      }}
+                      whileHover={{ scale: 1.02 }}
                     >
-                      {msg.timestamp?.toDate().toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </div>
-                  </div>
-                </div>
-              );
-            })
+                      <div style={{ fontSize: "0.95rem", color: "#333" }}>{msg.text}</div>
+                      <div
+                        className={`text-muted ${isSender ? "text-end" : "text-start"}`}
+                        style={{ fontSize: "0.75rem", marginTop: "4px" }}
+                      >
+                        {msg.timestamp?.toDate().toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </div>
+                    </motion.div>
+                  </motion.div>
+                );
+              })}
+            </AnimatePresence>
           )}
           <div ref={messagesEndRef} />
         </div>
 
         {/* Message Input */}
-        <div className="bg-light p-3 position-relative border-top">
-          {showEmojiPicker && (
-            <div
-              className="position-absolute"
-              style={{
-                bottom: "70px",
-                left: "10px",
-                zIndex: 1000,
-                boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-                borderRadius: "12px",
-              }}
-            >
-              <EmojiPicker onEmojiClick={onEmojiClick} />
-            </div>
-          )}
+        <motion.div 
+          className="bg-light p-3 position-relative border-top"
+          style={{ background: "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)" }}
+          initial={{ y: 50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+        >
+          <AnimatePresence>
+            {showEmojiPicker && (
+              <motion.div
+                initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.9 }}
+                className="position-absolute"
+                style={{
+                  bottom: "70px",
+                  left: "10px",
+                  zIndex: 1000,
+                  boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+                  borderRadius: "16px",
+                  overflow: "hidden"
+                }}
+              >
+                <EmojiPicker onEmojiClick={onEmojiClick} />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           <Form onSubmit={handleSubmit}>
             <InputGroup className="align-items-center">
-              <Button
-                variant="light"
-                className="rounded-circle me-2 border-0 shadow-sm d-flex align-items-center justify-content-center"
-                style={{
-                  width: "45px",
-                  height: "45px",
-                  backgroundColor: "#0d6efd",
-                }}
-                onClick={() => setShowEmojiPicker((prev) => !prev)}
-              >
-                <FaSmile size={20} color="white" />
-              </Button>
+              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                <Button
+                  variant="light"
+                  className="rounded-circle me-2 border-0 shadow-sm d-flex align-items-center justify-content-center"
+                  style={{
+                    width: "45px",
+                    height: "45px",
+                    backgroundColor: "#007AFF",
+                    minWidth: "45px",
+                    minHeight: "45px"
+                  }}
+                  onClick={() => setShowEmojiPicker((prev) => !prev)}
+                >
+                  <FaSmile size={20} color="white" />
+                </Button>
+              </motion.div>
 
               <Form.Control
                 placeholder="Type a message..."
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                className="rounded-pill border-0 shadow-sm px-3 py-2"
+                className="rounded-pill border-0 shadow-sm px-4 py-2"
                 style={{
-                  backgroundColor: "#f8f9fa",
+                  backgroundColor: "#ffffff",
                   fontSize: "1rem",
+                  minHeight: "45px"
                 }}
               />
 
-              <Button
-                type="submit"
-                variant="success"
-                className="rounded-circle ms-2 border-0 shadow-sm d-flex align-items-center justify-content-center"
-                style={{ width: "45px", height: "45px" }}
-              >
-                <FaPaperPlane />
-              </Button>
+              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
+                <Button
+                  type="submit"
+                  variant="primary"
+                  className="rounded-circle ms-2 border-0 shadow-sm d-flex align-items-center justify-content-center"
+                  style={{ 
+                    width: "45px", 
+                    height: "45px",
+                    minWidth: "45px",
+                    minHeight: "45px",
+                    backgroundColor: "#007AFF"
+                  }}
+                >
+                  <FaPaperPlane />
+                </Button>
+              </motion.div>
             </InputGroup>
           </Form>
-        </div>
+        </motion.div>
       </Card>
+      </motion.div>
     </div>
   );
 }

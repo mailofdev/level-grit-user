@@ -8,13 +8,13 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = () => {
     try {
-      const encryptedToken = sessionStorage.getItem("access_token");
+      const encryptedToken = sessionStorage.getItem("auth_data");
       if (encryptedToken) {
         const token = decryptToken(encryptedToken);
         return !!token;
       }
     } catch (err) {
-      console.error("Error reading access token:", err);
+      // Error reading access token
     }
     return false;
   };
@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = (token) => {
-    sessionStorage.setItem("access_token", token);
+    sessionStorage.setItem("auth_data", token);
     setIsAuthenticated(true);
   };
 

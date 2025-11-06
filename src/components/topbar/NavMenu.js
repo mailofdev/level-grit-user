@@ -1,14 +1,19 @@
 import { Link, useLocation } from "react-router-dom";
-import routes from "../navigation/Routes";
+import { memo, useMemo } from "react";
+import { getRoutes } from "../navigation/Routes";
 
-const NavMenu = ({ showIcons = true, onRouteClick }) => {
+const NavMenu = memo(({ showIcons = true, onRouteClick }) => {
   const location = useLocation();
+  const routes = useMemo(() => getRoutes(), []);
+  
+  const filteredRoutes = useMemo(() => 
+    routes.filter((item) => item.showIn?.includes("topbar")),
+    [routes]
+  );
 
   return (
     <ul className="navbar-nav mx-auto mb-2 mb-lg-0">
-      {routes
-        .filter((item) => item.showIn?.includes("topbar"))
-        .map((item, idx) => (
+      {filteredRoutes.map((item, idx) => (
           <li className="nav-item" key={idx}>
             <Link
               to={item.href}
@@ -24,6 +29,8 @@ const NavMenu = ({ showIcons = true, onRouteClick }) => {
         ))}
     </ul>
   );
-};
+});
+
+NavMenu.displayName = 'NavMenu';
 
 export default NavMenu;

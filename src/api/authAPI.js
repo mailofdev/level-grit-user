@@ -10,12 +10,26 @@ export const registerUser = async (userData) => {
   const { data } = await axiosInstance.post("api/auth/register", userData);
   return data;
 };
-
-export const getUserList = async () => {
-  const { data } = await axiosInstance.get("/users", {
-  });
+export const RegisterClient = async (userData) => {
+  const { data } = await axiosInstance.post("api/Trainer/Register-client", userData);
   return data;
 };
+
+export const GetClientsForTrainer = async () => {
+  const { data } = await axiosInstance.get("api/Trainer/GetClientsForTrainer"); 
+  return data;
+};
+
+export const GetProfileData = async () => {
+  const { data } = await axiosInstance.get("api/Auth/Profile");
+  return data;
+};
+
+export const UpdateProfileData = async (userData) => {
+  const { data } = await axiosInstance.post("api/Auth/UpdateProfile", userData);
+  return data;
+};
+
 
 export const deleteUserById = async (id) => {
   return axiosInstance.delete(`/users/${id}`);

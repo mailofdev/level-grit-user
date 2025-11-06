@@ -1,30 +1,95 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
+import { Tooltip, OverlayTrigger } from "react-bootstrap";
 
-export default function Heading({ path, pageName, sticky }) {
-  const navigate = useNavigate();
+export default function Heading({
+  pageName,
+  onBack,
+  showBackButton = true,
+  sticky = true,
+  rightContent = [],
+}) {
+  const handleDefaultBack = () => window.history.back();
 
-  const handleBack = () => {
-    if (path) {
-      navigate(path);
-    } else {
-      navigate(-1);
-    }
-  };
+  // Determine background based on sticky state
+  const backgroundStyle = sticky 
+    ? {
+        background: "var(--color-card-bg-hover)",
+        backdropFilter: 'blur(10px)',
+        WebkitBackdropFilter: 'blur(10px)',
+      }
+    : {
+        background: 'transparent',
+      };
 
   return (
-    <div 
-    // className={`d-flex align-items-center p-3 bg-white 
-    // border-bottom ${sticky ? "position-sticky top-0 shadow-sm" : ""}`}
-     className="shadow-sm p-3 bg-light position-sticky mb-2 d-flex align-items-center card flex-row"
-        style={{ top: "60px", zIndex: 500 }}
+    <div
+      className={`d-flex align-items-center p-2 p-md-3 ${sticky ? 'my-2 rounded shadow-sm sticky-top' : ''}`}
+      style={{
+        zIndex: 1030,
+        position: sticky ? "sticky" : "relative",
+        top: 0,
+        ...backgroundStyle,
+        minHeight: '56px'
+      }} 
     >
-      <button className="btn btn-outline-secondary btn-sm me-3" onClick={handleBack}>
-        <FaArrowLeft />
-      </button>
-      <h5 className="mb-0 flex-grow-1 text-center">{pageName}</h5>
-      <div style={{ width: "38px" }}>{/* Empty space to balance layout */}</div>
+      {/* Left: Back Button */}
+      {showBackButton && (
+        <div className="d-flex align-items-center">
+          <button
+            className="btn btn-light rounded-circle shadow-sm border-0"
+            onClick={onBack || handleDefaultBack}
+            aria-label="Go back"
+            style={{
+              width: "44px",
+              height: "44px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              minWidth: "44px",
+              minHeight: "44px",
+            }}
+          >
+            <FaArrowLeft />
+          </button>
+        </div>
+      )}
+
+      {/* Center: Title */}
+      <div className="position-absolute start-50 translate-middle-x text-center w-50 px-2">
+        <h5 className="mb-0 fw-bold text-truncate fs-6 fs-md-5">{pageName}</h5>
+      </div>
+
+      {/* Right: Dynamic Buttons or JSX */}
+      <div className="ms-auto d-flex align-items-center gap-2">
+        {Array.isArray(rightContent)
+          ? rightContent.map((btn, idx) => (
+              <OverlayTrigger
+                key={idx}
+                placement="bottom"
+                overlay={<Tooltip id={`tooltip-${idx}`}>{btn.label}</Tooltip>}
+              >
+                <span>
+                  <button
+                    className={`btn ${btn.size || 'btn-sm'} ${btn.variant || "btn-primary"} rounded-pill fw-semibold`}
+                    onClick={btn.onClick}
+                    disabled={btn.disabled}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      minHeight: '44px',
+                      gap: '0.5rem'
+                    }}
+                  >
+                    {btn.icon && <span>{btn.icon}</span>}
+                    {btn.label && <span className="d-none d-sm-inline">{btn.label}</span>}
+                  </button>
+                </span>
+              </OverlayTrigger>
+            ))
+          : rightContent}
+      </div>
     </div>
   );
 }
