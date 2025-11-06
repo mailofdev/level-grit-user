@@ -27,7 +27,7 @@ const Services = () => {
       title: 'Online Personal Training',
       icon: FaDumbbell,
       gradient: 'linear-gradient(135deg, #C8E6C9 0%, #A5D6A7 100%)',
-      color: '#4CAF50',
+      color: '#00C853',
       features: [
         'Live workout sessions via video calls',
         'Real-time form correction and feedback',
@@ -79,7 +79,7 @@ const Services = () => {
           animate={{ opacity: 1, y: 0 }}
         >
           <h1 className="display-4 fw-bold mb-3" style={{ color: '#333' }}>
-            Our <span style={{ color: '#4CAF50' }}>Services</span>
+            Our <span style={{ color: '#00C853' }}>Services</span>
           </h1>
           <p className="lead text-muted" style={{ maxWidth: '800px', margin: '0 auto' }}>
             Comprehensive fitness and nutrition solutions tailored to your unique needs and goals
@@ -113,14 +113,6 @@ const Services = () => {
                         <span className="fw-bold" style={{ color: '#333', fontSize: '1.2rem' }}>
                           {service.price}
                         </span>
-                        <motion.button
-                          className="btn btn-dark rounded-pill px-4"
-                          whileHover={{ scale: 1.05 }}
-                          whileTap={{ scale: 0.95 }}
-                          onClick={() => navigate('/register')}
-                        >
-                          Get Started <FaArrowRight className="ms-2" />
-                        </motion.button>
                       </div>
                     </div>
                   </div>
@@ -160,7 +152,7 @@ const Services = () => {
                   transition={{ delay: idx * 0.1 }}
                 >
                   <div className="card border-0 shadow-sm h-100 p-4 text-center" style={{ borderRadius: '1rem' }}>
-                    <h5 className="fw-bold mb-3" style={{ color: '#4CAF50' }}>{benefit.title}</h5>
+                    <h5 className="fw-bold mb-3" style={{ color: '#00C853' }}>{benefit.title}</h5>
                     <p className="text-muted mb-0">{benefit.desc}</p>
                   </div>
                 </motion.div>
@@ -180,9 +172,6 @@ const Services = () => {
             Ready to Transform Your Life?
           </h3>
           <p className="text-muted mb-4">Choose the service that's right for you and get started today</p>
-          <Link to="/register" className="btn btn-lg rounded-pill px-5 py-3" style={{ backgroundColor: '#4CAF50', color: '#fff' }}>
-            Start Your Journey
-          </Link>
         </motion.section>
           </div>
         </div>

@@ -238,16 +238,6 @@ navigate('/')
 
           {/* Links */}
           <div className="text-center mt-4">
-            <p className="text-muted mb-2" style={{ fontSize: '0.9rem' }}>
-              Don't have an account?{" "}
-              <Link
-                to="/register"
-                className="text-decoration-none fw-semibold smooth-transition"
-                style={{ color: "var(--color-primary)" }}
-              >
-                Create Account
-              </Link>
-            </p>
             <p className="mb-0">
               <Link
                 to="/reset-password"

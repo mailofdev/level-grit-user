@@ -30,7 +30,6 @@ import MainLayout from "./layouts/MainLayout";
 // Authentication Components
 const LandingPage = lazy(() => import("./features/landing/LandingPage"));
 const LoginForm = lazy(() => import("./features/auth/LoginForm"));
-const RegisterForm = lazy(() => import("./features/auth/RegisterForm"));
 const ResetPasswordForm = lazy(() =>
   import("./features/auth/ResetPasswordForm")
 );
@@ -116,7 +115,6 @@ function App() {
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/login" element={<LoginForm />} />
                 <Route path="/index.html" element={<Navigate to="/" replace />} />
-                <Route path="/register" element={<RegisterForm />} />
                 <Route path="/reset-password" element={<ResetPasswordForm />} />
                 <Route path="/terms-conditions" element={<TermsAndConditions />} />
                 <Route path="/privacy-policy" element={<PrivacyPolicy />} />

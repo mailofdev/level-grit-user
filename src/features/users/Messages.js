@@ -141,10 +141,10 @@ export default function Messages({ isTrainer = false }) {
                         maxWidth: "70%",
                         wordBreak: "break-word",
                         backgroundColor: isSender 
-                          ? "linear-gradient(135deg, #007AFF 0%, #0056b3 100%)" 
+                          ? "linear-gradient(135deg, #00C853 0%, #00B248 100%)" 
                           : "#ffffff",
                         background: isSender 
-                          ? "linear-gradient(135deg, #007AFF 0%, #0056b3 100%)" 
+                          ? "linear-gradient(135deg, #00C853 0%, #00B248 100%)" 
                           : "#ffffff",
                         borderRadius: isSender
                           ? "20px 20px 0 20px"
@@ -210,7 +210,7 @@ export default function Messages({ isTrainer = false }) {
                   style={{
                     width: "45px",
                     height: "45px",
-                    backgroundColor: "#007AFF",
+                    backgroundColor: "#00C853",
                     minWidth: "45px",
                     minHeight: "45px"
                   }}
@@ -242,7 +242,7 @@ export default function Messages({ isTrainer = false }) {
                     height: "45px",
                     minWidth: "45px",
                     minHeight: "45px",
-                    backgroundColor: "#007AFF"
+                    backgroundColor: "#4CAF50"
                   }}
                 >
                   <FaPaperPlane />

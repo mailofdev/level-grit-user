@@ -227,11 +227,11 @@ const LandingPage = () => {
                 <button
                   className="btn rounded-pill px-4 fw-semibold me-2"
                   onClick={handleSignInNavigation}
-                  style={{
-                    backgroundColor: "transparent",
-    color: "#4CAF50",
-    border: "2px solid #4CAF50",
-                  }}
+          style={{
+            backgroundColor: "transparent",
+            color: "#00C853",
+            border: "2px solid #00C853",
+          }}
                 >
                   Login
                 </button>
@@ -257,7 +257,7 @@ const LandingPage = () => {
                 >
                   Your Coaching,
                   <br />
-                  <span style={{ color: "#4CAF50" }}>Supercharged.</span>
+                  <span style={{ color: "#00C853" }}>Supercharged.</span>
                 </h1>
                 <p
                   className="lead mb-4"
@@ -305,7 +305,7 @@ const LandingPage = () => {
                     whileHover={{ opacity: 0.9 }}
                   >
                     <small className="text-muted d-block">Daily Steps</small>
-                    <strong style={{ color: "#4CAF50", fontSize: "1.2rem" }}>
+                    <strong style={{ color: "#00C853", fontSize: "1.2rem" }}>
                       7,500
                     </strong>
                   </motion.div>
@@ -324,7 +324,7 @@ const LandingPage = () => {
                     <small className="text-muted d-block">
                       Calories Burned
                     </small>
-                    <strong style={{ color: "#4CAF50", fontSize: "1.2rem" }}>
+                    <strong style={{ color: "#00C853", fontSize: "1.2rem" }}>
                       1,200
                     </strong>
                   </motion.div>
@@ -393,7 +393,7 @@ const LandingPage = () => {
                       <feature.icon
                         className="mb-3"
                         size={40}
-                        style={{ color: "#4CAF50" }}
+                        style={{ color: "#00C853" }}
                       />
                       <h4 className="fw-bold mb-3" style={{ color: "#333" }}>
                         {feature.title}
@@ -699,7 +699,7 @@ const LandingPage = () => {
           style={{
             zIndex: 1050,
             minHeight: "56px",
-            backgroundColor: "#007AFF",
+            backgroundColor: "#00C853",
             border: "none",
           }}
           initial={{ opacity: 0, y: 20 }}

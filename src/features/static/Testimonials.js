@@ -68,7 +68,7 @@ const Testimonials = () => {
           animate={{ opacity: 1, y: 0 }}
         >
           <h1 className="display-4 fw-bold mb-3" style={{ color: '#333' }}>
-            Client <span style={{ color: '#4CAF50' }}>Testimonials</span>
+            Client <span style={{ color: '#00C853' }}>Testimonials</span>
           </h1>
           <p className="lead text-muted" style={{ maxWidth: '800px', margin: '0 auto' }}>
             Hear what our clients have to say about their transformation journey with LevelGrit
@@ -155,7 +155,7 @@ const Testimonials = () => {
                   transition={{ delay: idx * 0.1 }}
                 >
                   <div className="p-4">
-                    <h2 className="fw-bold mb-2" style={{ color: '#4CAF50', fontSize: '3rem' }}>
+                    <h2 className="fw-bold mb-2" style={{ color: '#00C853', fontSize: '3rem' }}>
                       {stat.number}
                     </h2>
                     <p className="text-muted mb-0">{stat.label}</p>
@@ -169,7 +169,7 @@ const Testimonials = () => {
         {/* CTA */}
         <motion.section 
           className="text-center py-5"
-          style={{ backgroundColor: '#4CAF50', color: '#fff', borderRadius: '1rem' }}
+          style={{ backgroundColor: '#00C853', color: '#fff', borderRadius: '1rem' }}
           initial={{ opacity: 0, scale: 0.9 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
@@ -179,9 +179,6 @@ const Testimonials = () => {
             <p className="mb-4" style={{ fontSize: '1.1rem' }}>
               Join thousands of clients who have transformed their lives with LevelGrit
             </p>
-            <Link to="/register" className="btn btn-light btn-lg rounded-pill px-5 py-3">
-              Start Your Journey Today
-            </Link>
           </div>
         </motion.section>
           </div>

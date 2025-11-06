@@ -85,12 +85,12 @@ body {
 .auth-page-enter .form-control:focus,
 .auth-page-enter .form-select:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+  box-shadow: 0 0 0 3px rgba(0, 200, 83, 0.1);
   outline: none;
 }
 
 .auth-page-enter .btn-primary:hover {
-  box-shadow: 0 4px 12px rgba(0, 122, 255, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 200, 83, 0.3);
   /* Removed transform for smoother hover */
 }
 
