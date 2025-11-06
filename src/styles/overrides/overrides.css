@@ -96,7 +96,7 @@ body.dark .navbar-toggler-icon {
   background: var(--color-card-bg);
   border: 1px solid var(--color-border);
   color: var(--color-text);
-  border-radius: var(--border-radius-lg);
+  border-radius: 1rem;
   box-shadow: var(--shadow-sm);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -167,11 +167,12 @@ body.dark .navbar-toggler-icon {
 .form-control {
   background-color: var(--color-input-bg);
   color: var(--color-text);
-  border: 1.5px solid var(--color-input-border);
+  border: 1px solid var(--color-input-border);
   border-radius: var(--border-radius);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1.125rem;
   font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .form-control:hover {
@@ -195,11 +196,12 @@ body.dark .navbar-toggler-icon {
 .form-select {
   background-color: var(--color-input-bg);
   color: var(--color-text);
-  border: 1.5px solid var(--color-input-border);
+  border: 1px solid var(--color-input-border);
   border-radius: var(--border-radius);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1.125rem;
   font-size: 0.95rem;
+  line-height: 1.5;
 }
 
 .form-select:hover {
@@ -437,16 +439,17 @@ body.dark .navbar-toggler-icon {
   border-color: rgba(23, 162, 184, 0.2);
 }
 
-/* Enhanced Links */
-a {
+/* Enhanced Links - HealthifyMe Style */
+a:not(.btn):not(.nav-link):not(.dropdown-item) {
   color: var(--color-link);
   text-decoration: none;
-  transition: color 0.3s ease;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid transparent;
 }
 
-a:hover {
+a:not(.btn):not(.nav-link):not(.dropdown-item):hover {
   color: var(--color-link-hover);
-  text-decoration: underline;
+  border-bottom-color: var(--color-link-hover);
 }
 
 /* Enhanced Modals */
@@ -672,8 +675,10 @@ a:hover {
   body { padding-bottom: max(0px, env(safe-area-inset-bottom)); }
 }
 
-/* Enhanced Badges */
+/* Enhanced Badges - HealthifyMe Style */
 .badge {
+  background: var(--color-button-bg);
+  color: #fff;
   font-weight: 600;
   padding: 0.5rem 1rem;
   font-size: 0.75rem;
@@ -681,6 +686,7 @@ a:hover {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+  border-radius: 1rem;
 }
 
 .badge.rounded-pill {
@@ -1163,17 +1169,40 @@ html {
 =========================================== */
 
 h1, h2, h3, h4, h5, h6 {
+  line-height: 1.3;
+  margin-bottom: 0.75rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--color-text);
+}
+
+h1 {
+  font-size: 3rem;
   line-height: 1.2;
-  margin-bottom: 0.5rem;
+}
+
+h2 {
+  font-size: 2.25rem;
+  line-height: 1.25;
+}
+
+h3 {
+  font-size: 1.75rem;
+  line-height: 1.3;
+}
+
+p {
+  line-height: 1.7;
+  color: var(--color-text);
 }
 
 @media (max-width: 768px) {
-  h1 { font-size: 1.75rem; }
-  h2 { font-size: 1.5rem; }
-  h3 { font-size: 1.25rem; }
-  h4 { font-size: 1.1rem; }
-  h5 { font-size: 1rem; }
-  h6 { font-size: 0.9rem; }
+  h1 { font-size: 2rem; line-height: 1.2; }
+  h2 { font-size: 1.75rem; line-height: 1.25; }
+  h3 { font-size: 1.5rem; line-height: 1.3; }
+  h4 { font-size: 1.25rem; }
+  h5 { font-size: 1.1rem; }
+  h6 { font-size: 1rem; }
 }
 
 /* =========================================

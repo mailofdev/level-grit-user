@@ -710,7 +710,7 @@ const LandingPage = () => {
           whileHover={{ opacity: 0.9 }}
         >
           <FaDownload size={20} />
-          <span className="fw-semibold">Install PWA App</span>
+          <span className="fw-semibold">Install PWA</span>
         </motion.button>
       )}
 
