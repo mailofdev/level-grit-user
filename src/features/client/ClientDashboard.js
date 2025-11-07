@@ -2,6 +2,7 @@ import React, { useState, useRef } from "react";
 import { ProgressBar } from "react-bootstrap";
 import { useNavigate, useLocation } from "react-router-dom";
 import Heading from "../../components/navigation/Heading";
+import ShareProgressModal from "../../components/common/ShareProgressModal"; // Add this import
 import {
   FaFire,
   FaCheckCircle,
@@ -24,6 +25,7 @@ export default function ClientDashboard() {
   const [selectedMealIndex, setSelectedMealIndex] = useState(null);
   const [stream, setStream] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [showShareModal, setShowShareModal] = useState(false); // Add this state
 
   const client = { ...location.state?.client };
 
@@ -136,6 +138,28 @@ export default function ClientDashboard() {
 
   const completedMeals = dashboardData.meals.filter((m) => m.completed).length;
   const remainingMeals = dashboardData.meals.length - completedMeals;
+
+  // Prepare data for ShareProgressModal
+  const shareClientData = {
+    name: client.fullName || "Alex",
+    streak: dashboardData.streakProgress.current,
+    streakCurrent: dashboardData.streakProgress.current,
+    streakGoal: dashboardData.streakProgress.goal,
+    completedMeals: completedMeals,
+    totalMeals: dashboardData.meals.length,
+    macros: [
+      {
+        label: 'calories',
+        value: dashboardData.macros.calories.value,
+        target: dashboardData.macros.calories.target
+      },
+      {
+        label: 'protein',
+        value: dashboardData.macros.protein.value,
+        target: dashboardData.macros.protein.target
+      }
+    ]
+  };
 
   // Handle meal click - open camera for incomplete meals
   const handleMealClick = (mealIndex) => {
@@ -294,19 +318,9 @@ export default function ClientDashboard() {
     );
   };
 
-  const handleShare = async () => {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: "My Fitness Streak",
-          text: `I'm on a ${dashboardData.user.streak}-day fitness streak! 💪🔥`,
-        });
-      } catch (error) {
-        console.error("Share failed", error);
-      }
-    } else {
-      alert("Share not supported");
-    }
+  // Updated handleShare function to open modal
+  const handleShare = () => {
+    setShowShareModal(true);
   };
 
   return (
@@ -595,6 +609,13 @@ export default function ClientDashboard() {
           </div>
         </div>
       )}
+
+      {/* Share Progress Modal */}
+      <ShareProgressModal
+        show={showShareModal}
+        onHide={() => setShowShareModal(false)}
+        clientData={shareClientData}
+      />
     </div>
   );
 }
