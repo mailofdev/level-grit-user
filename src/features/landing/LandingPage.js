@@ -1,14 +1,13 @@
-import {
-  FaMobile,
-  FaUsers,
-  FaChartLine,
-  FaCheckCircle,
-  FaFacebook,
-  FaInstagram,
-  FaLinkedin,
-  FaEnvelope,
+import { 
+  FaCamera, 
+  FaUserCheck, 
+  FaTrophy, 
+  FaSmile,
+  FaFacebook, 
+  FaInstagram, 
+  FaLinkedin, 
+  FaEnvelope, 
   FaPhone,
-  FaUserPlus,
   FaDownload,
 } from "react-icons/fa";
 import { useNavigate, Link } from "react-router-dom";
@@ -22,11 +21,10 @@ const LandingPage = () => {
   const [showInstallButton, setShowInstallButton] = useState(false);
 
   useEffect(() => {
-    // Check if app is already installed
     const checkIfInstalled = () => {
-      return window.matchMedia("(display-mode: standalone)").matches || 
-             (window.navigator.standalone === true) ||
-             document.referrer.includes('android-app://');
+      return window.matchMedia("(display-mode: standalone)").matches ||
+        (window.navigator.standalone === true) ||
+        document.referrer.includes('android-app://');
     };
 
     if (checkIfInstalled()) {
@@ -34,16 +32,13 @@ const LandingPage = () => {
       return;
     }
 
-    // Check if we're on a supported platform/browser
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     const isChrome = /Chrome/.test(navigator.userAgent) && /Google Inc/.test(navigator.vendor);
     const isEdge = /Edg/.test(navigator.userAgent);
     const isSafari = /Safari/.test(navigator.userAgent) && !/Chrome/.test(navigator.userAgent);
     const isFirefox = /Firefox/.test(navigator.userAgent);
-    
     const isSupportedPlatform = isMobile || isChrome || isEdge || isSafari || isFirefox;
 
-    // Handler for beforeinstallprompt event (primary method)
     const handler = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
@@ -52,36 +47,27 @@ const LandingPage = () => {
 
     window.addEventListener("beforeinstallprompt", handler);
 
-    // Fallback: Check if PWA is installable and show button
     const checkInstallability = () => {
       if (checkIfInstalled()) {
         setShowInstallButton(false);
         return;
       }
 
-      // Check if service worker is registered (PWA requirement)
       if ('serviceWorker' in navigator) {
         navigator.serviceWorker.getRegistration().then((registration) => {
           if (registration && isSupportedPlatform) {
-            // Service worker is registered and platform is supported
-            // Show button as fallback (beforeinstallprompt might not fire immediately)
             setShowInstallButton(true);
           }
         }).catch(() => {
-          // If service worker check fails but platform is supported, still show button
-          // (user might be able to install via browser menu)
           if (isSupportedPlatform && (isMobile || isSafari)) {
             setShowInstallButton(true);
           }
         });
       } else if (isSupportedPlatform && (isMobile || isSafari)) {
-        // Even without service worker check, show button on mobile/Safari
-        // (they have manual install options)
         setShowInstallButton(true);
       }
     };
 
-    // Check installability after delays to allow service worker registration
     const timeoutId1 = setTimeout(checkInstallability, 500);
     const timeoutId2 = setTimeout(checkInstallability, 2000);
 
@@ -94,29 +80,21 @@ const LandingPage = () => {
 
   const handleInstallClick = async () => {
     if (deferredPrompt) {
-      // Use the deferred prompt if available (Android Chrome, Edge, etc.)
       deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-      
       if (outcome === "accepted") {
         setShowInstallButton(false);
       }
-      
       setDeferredPrompt(null);
     } else {
-      // Fallback for browsers that don't support beforeinstallprompt
-      // Show instructions or try alternative methods
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
       const isAndroid = /Android/.test(navigator.userAgent);
-      
+
       if (isIOS) {
-        // iOS Safari - show instructions
         alert('To install this app:\n1. Tap the Share button\n2. Select "Add to Home Screen"');
       } else if (isAndroid) {
-        // Android - try to trigger install via manifest
         alert('To install this app, look for the "Add to Home Screen" option in your browser menu.');
       } else {
-        // Desktop browsers
         alert('To install this app, look for the install icon in your browser\'s address bar.');
       }
     }
@@ -124,8 +102,6 @@ const LandingPage = () => {
 
   const handleSignInNavigation = () => navigate("/login");
 
-
-  // Animation variants
   const fadeInUp = {
     initial: { opacity: 0, y: 30 },
     animate: { opacity: 1, y: 0 },
@@ -227,25 +203,28 @@ const LandingPage = () => {
                 <button
                   className="btn rounded-pill px-4 fw-semibold me-2"
                   onClick={handleSignInNavigation}
-          style={{
-            backgroundColor: "transparent",
-            color: "#00C853",
-            border: "2px solid #00C853",
-          }}
+                  style={{
+                    backgroundColor: "transparent",
+                    color: "#00C853",
+                    border: "2px solid #00C853",
+                  }}
                 >
                   Login
                 </button>
               </li>
-              
             </ul>
           </div>
         </div>
       </nav>
 
-      {/* Hero Section with 3D Animation */}
+      {/* Hero Section */}
       <section
         className="py-5"
-        style={{ marginTop: "80px", paddingTop: "4rem", paddingBottom: "4rem" }}
+        style={{
+          marginTop: "80px",
+          paddingTop: "4rem",
+          paddingBottom: "4rem",
+        }}
       >
         <div className="container">
           <div className="row align-items-center">
@@ -255,24 +234,30 @@ const LandingPage = () => {
                   className="display-3 fw-bold mb-4"
                   style={{ color: "#333", lineHeight: "1.2" }}
                 >
-                  Your Coaching,
-                  <br />
-                  <span style={{ color: "#00C853" }}>Supercharged.</span>
+                  Snap. Track. Share<br />
+                  <span style={{ color: "#00C853" }}>Your Progress.</span>
                 </h1>
                 <p
                   className="lead mb-4"
                   style={{ color: "#666", fontSize: "1.1rem" }}
                 >
-                  We don’t replace you with AI — we empower certified coaches
-                  with tools that make tracking, engaging, and motivating
-                  clients effortless. Turn daily check-ins into long-term client
-                  success.
+                  We don't rely on AI for your well-being — real certified coaches guide you every step. Snap your meals, get instant macros, stay motivated, and celebrate your consistency by sharing streaks with friends and family.
                 </p>
-                
+                <motion.button
+                  className="btn btn-lg rounded-pill px-5 py-3"
+                  style={{
+                    backgroundColor: "#00C853",
+                    color: "#fff",
+                    border: "none",
+                    minHeight: "52px",
+                  }}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => navigate("/login")}
+                >
+                  👉 Join Today & Snap Your First Meal
+                </motion.button>
               </motion.div>
-              <div className="small text-muted">
-                Your clients stay consistent. You stay focused. AI just helps.
-              </div>
             </div>
             <div className="col-lg-6 text-center">
               <motion.div
@@ -282,8 +267,8 @@ const LandingPage = () => {
               >
                 <div className="position-relative">
                   <img
-                    src="https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=600&h=500&fit=crop&q=80"
-                    alt="Fitness"
+                    src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600&h=500&fit=crop&q=80"
+                    alt="Fitness Meal"
                     className="img-fluid rounded-4 shadow-lg"
                     style={{
                       maxHeight: "500px",
@@ -291,22 +276,20 @@ const LandingPage = () => {
                       width: "100%",
                     }}
                   />
-                  {/* Floating metric cards with 3D effect */}
                   <motion.div
                     className="position-absolute bg-white rounded-3 p-3 shadow"
                     style={{
                       top: "20px",
                       left: "-20px",
-                      transform: "translate(0, 0)",
                     }}
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
-                    whileHover={{ opacity: 0.9 }}
+                    whileHover={{ scale: 1.05 }}
                   >
-                    <small className="text-muted d-block">Daily Steps</small>
+                    <small className="text-muted d-block">Streak</small>
                     <strong style={{ color: "#00C853", fontSize: "1.2rem" }}>
-                      7,500
+                      🔥 7 Days
                     </strong>
                   </motion.div>
                   <motion.div
@@ -314,18 +297,15 @@ const LandingPage = () => {
                     style={{
                       bottom: "20px",
                       right: "-20px",
-                      transform: "translate(0, 0)",
                     }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.7 }}
-                    whileHover={{ opacity: 0.9 }}
+                    whileHover={{ scale: 1.05 }}
                   >
-                    <small className="text-muted d-block">
-                      Calories Burned
-                    </small>
+                    <small className="text-muted d-block">Macros</small>
                     <strong style={{ color: "#00C853", fontSize: "1.2rem" }}>
-                      1,200
+                      ✓ Tracked
                     </strong>
                   </motion.div>
                 </div>
@@ -335,17 +315,17 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* How LevelGrit helps you Section with 3D Cards */}
+      {/* Why Clients Love Us Section */}
       <section className="py-5" style={{ backgroundColor: "#f8f9fa" }}>
         <div className="container">
           <motion.h2
-            className="text-center fw-bold mb-3"
+            className="text-center fw-bold mb-5"
             style={{ fontSize: "2.5rem", color: "#333" }}
             initial={{ opacity: 0, y: -20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            Why Coaches Love Us
+            Why Clients Love Us
           </motion.h2>
           <motion.div
             className="row g-4"
@@ -356,100 +336,105 @@ const LandingPage = () => {
           >
             {[
               {
-                title: "Engage Clients Daily",
-                desc: "Chat, motivate, and inspire consistency without juggling multiple apps.",
-                icon: FaMobile,
-                img: "https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=400&h=300&fit=crop&q=80",
+                title: "📸 Snap & Upload Meals",
+                desc: "Just take a picture — get instant macro feedback, no guesswork.",
+                icon: FaCamera,
               },
               {
-                title: "Track Progress Effortlessly",
-                desc: "Macro tracking, meal snapshots, and fitness logs in one clear view.",
-                icon: FaCheckCircle,
-                img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400&h=300&fit=crop&q=80",
+                title: "🎯 Stay Accountable",
+                desc: "Your coach checks in daily to keep you on track.",
+                icon: FaUserCheck,
               },
               {
-                title: "Save Time, Coach More",
-                desc: "AI handles the data grunt work so you can focus on personal coaching.",
-                icon: FaChartLine,
-                img: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=400&h=300&fit=crop&q=80",
+                title: "🏆 Share Your Streaks",
+                desc: "Celebrate wins by posting streaks on social media, inspiring your friends (and yourself).",
+                icon: FaTrophy,
+              },
+              {
+                title: "🎉 Make Fitness Fun",
+                desc: "Daily motivation, achievable goals, and social recognition keep you consistent.",
+                icon: FaSmile,
               },
             ].map((feature, idx) => (
-              <div key={idx} className="col-md-4">
-               
-                  <div
-                    className="card border-0 shadow-sm h-100"
-                    style={{ borderRadius: "1rem", overflow: "hidden" }}
-                  >
-                    <img
-                      src={feature.img}
-                      alt={feature.title}
-                      style={{
-                        width: "100%",
-                        height: "200px",
-                        objectFit: "cover",
-                      }}
-                    />
-                    <div className="card-body p-4">
-                      <feature.icon
-                        className="mb-3"
-                        size={40}
-                        style={{ color: "#00C853" }}
-                      />
-                      <h4 className="fw-bold mb-3" style={{ color: "#333" }}>
-                        {feature.title}
-                      </h4>
-                      <p className="text-muted mb-0">{feature.desc}</p>
-                    </div>
-                  </div>
-               
+              <div key={idx} className="col-md-6 col-lg-3">
+                <motion.div
+                  className="card border-0 shadow-sm h-100 text-center p-4"
+                  style={{ borderRadius: "1rem" }}
+                  whileHover={{ y: -10 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <feature.icon
+                    className="mx-auto mb-3"
+                    size={48}
+                    style={{ color: "#00C853" }}
+                  />
+                  <h5 className="fw-bold mb-3" style={{ color: "#333" }}>
+                    {feature.title}
+                  </h5>
+                  <p className="text-muted mb-0">{feature.desc}</p>
+                </motion.div>
               </div>
             ))}
           </motion.div>
         </div>
       </section>
 
-      {/* The right plan for your health Section */}
+      {/* How It Works Section */}
       <section className="py-5">
         <div className="container">
           <motion.h2
-            className="text-center fw-bold mb-3"
-            variants={fadeInUp}
-            initial="hidden"
-            whileInView="visible"
+            className="text-center fw-bold mb-5"
+            style={{ fontSize: "2.5rem", color: "#333" }}
+            initial={{ opacity: 0, y: -20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
           >
             How It Works
           </motion.h2>
           <motion.div
             className="row justify-content-center g-4"
             variants={staggerContainer}
-            initial="hidden"
-            whileInView="visible"
+            initial="initial"
+            whileInView="animate"
+            viewport={{ once: true }}
           >
             {[
               {
-                title: "Onboard Clients Easily",
-                desc: "No messy spreadsheets, just simple profiles.",
-                icon: FaUserPlus,
+                step: "1",
+                title: "Snap Your Meal",
+                desc: "Upload and get real-time macro feedback.",
               },
               {
-                title: "Monitor & Motivate",
-                desc: "Daily check-ins, chats, and progress tracking.",
-                icon: FaChartLine,
+                step: "2",
+                title: "Coach Keeps You On Track",
+                desc: "Stay accountable with daily nudges and motivation.",
               },
               {
-                title: "Grow Your Impact",
-                desc: "Scale your coaching while staying personal.",
-                icon: FaUsers,
+                step: "3",
+                title: "Celebrate Your Streaks",
+                desc: "Share progress on social and keep winning every day.",
               },
             ].map((step, i) => (
               <motion.div
                 key={i}
                 className="col-md-4"
-                whileHover={{ opacity: 0.9 }}
+                whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.2 }}
               >
                 <div className="card border-0 shadow-sm text-center h-100 p-4 rounded-4">
-                  <step.icon size={36} className="text-success mb-3" />
+                  <div
+                    className="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                    style={{
+                      width: "60px",
+                      height: "60px",
+                      backgroundColor: "#00C853",
+                      color: "#fff",
+                      fontSize: "1.5rem",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    {step.step}
+                  </div>
                   <h5 className="fw-bold text-dark mb-3">{step.title}</h5>
                   <p className="text-muted">{step.desc}</p>
                 </div>
@@ -459,263 +444,94 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Still have questions? Section */}
+      {/* Testimonials Section */}
       <section className="py-5" style={{ backgroundColor: "#f8f9fa" }}>
         <div className="container text-center">
-          <motion.h3
-            className="fw-bold mb-3"
-            style={{ fontSize: "2rem", color: "#333" }}
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-          >
-            Still have questions?
-          </motion.h3>
-          <motion.p
-            className="text-muted mb-4"
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-          >
-            We're here to help you on your fitness journey.
-          </motion.p>
-          <motion.button
-            className="btn btn-lg rounded-pill px-5 py-3"
-            onClick={() => navigate("/contact")}
-            style={{
-              backgroundColor: "#1a1a1a",
-              color: "#fff",
-              minHeight: "52px",
-            }}
-            whileHover={{ opacity: 0.9 }}
-          >
-            Contact Us
-          </motion.button>
-        </div>
-      </section>
-
-      {/* Introducing the LevelGrit app Section */}
-      <section className="py-5">
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-6 mb-4 mb-lg-0 text-center">
-              <motion.div
-                className="d-flex gap-3 justify-content-center"
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-              >
-                <img
-                  src="https://images.unsplash.com/photo-1551963831-b3b1ca40c98e?w=300&h=600&fit=crop&q=80"
-                  alt="App Screen 1"
-                  className="rounded shadow"
-                  style={{
-                    width: "150px",
-                    height: "300px",
-                    objectFit: "cover",
-                  }}
-                />
-                <img
-                  src="https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=300&h=600&fit=crop&q=80"
-                  alt="App Screen 2"
-                  className="rounded shadow"
-                  style={{
-                    width: "150px",
-                    height: "300px",
-                    objectFit: "cover",
-                  }}
-                />
-              </motion.div>
-            </div>
-            <div className="col-lg-6">
-              <motion.div
-                initial={{ opacity: 0, x: 50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-              >
-                <h2
-                  className="fw-bold mb-4"
-                  style={{ fontSize: "2.5rem", color: "#333" }}
-                >
-                  Introducing the LevelGrit app
-                </h2>
-                <p className="mb-4 text-muted" style={{ fontSize: "1.1rem" }}>
-                  Access your personalized fitness and nutrition plans, track
-                  your progress, communicate with your coach, and stay
-                  motivated—all from the palm of your hand. Available as a
-                  Progressive Web App - no download needed!
-                </p>
-              
-              </motion.div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Client Testimonials Section */}
-      <section className="py-5 " style={{ backgroundColor: "#f8f9fa" }}>
-        <div className="container text-center">
           <motion.h2
-            className="text-center fw-bold mb-3"
+            className="text-center fw-bold mb-5"
+            style={{ fontSize: "2.5rem", color: "#333" }}
             initial={{ opacity: 0, y: -20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            Client Testimonial
+            What Our Clients Say
           </motion.h2>
           <motion.div
             className="mx-auto"
-            style={{ maxWidth: "500px" }}
+            style={{ maxWidth: "700px" }}
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
           >
-            <div>
-              <div className="card border-0 shadow-lg rounded-4 overflow-hidden">
-                <img
-                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=600&h=400&fit=crop&q=80"
-                  alt="Coach"
-                  className="img-fluid"
-                  style={{ height: "300px", objectFit: "cover" }}
-                />
-                <div className="card-body p-4">
-                  <h5 className="fw-bold text-dark mb-3">Certified Coach</h5>
-                  <p className="text-muted fst-italic">
-                    “This tool cut my time in half — now I coach more
-                    people, and they love the daily check-ins!”
-                  </p>
-                </div>
-              </div>
+            <div className="card border-0 shadow-lg rounded-4 p-5">
+              <p
+                className="text-muted fst-italic mb-4"
+                style={{ fontSize: "1.1rem" }}
+              >
+                🗨️ "I love sharing my streaks! My friends cheer me on, and my coach keeps me consistent — fitness finally feels fun."
+              </p>
+              <p className="fw-bold text-dark mb-0">— Happy Client</p>
             </div>
           </motion.div>
         </div>
       </section>
 
-      {/* A judgement-free space for everyone Section */}
+      {/* Final CTA Section */}
       <section className="py-5">
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-6 mb-4 mb-lg-0">
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-              >
-                <h2
-                  className="fw-bold mb-4"
-                  style={{ fontSize: "2.5rem", color: "#333" }}
-                >
-                  A judgement-free space for everyone
-                </h2>
-                <p className="text-muted mb-4" style={{ fontSize: "1.1rem" }}>
-                  At LevelGrit, we believe fitness is for everyone. Our
-                  inclusive community welcomes people of all ages, backgrounds,
-                  and fitness levels. We celebrate every step of your journey,
-                  no matter where you start.
-                </p>
-              </motion.div>
-            </div>
-            <div className="col-lg-6">
-              <motion.div
-                className="row g-2"
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-              >
-                {[
-                  "https://images.unsplash.com/photo-1510915228340-29c85a43dcfe?w=200&h=200&fit=crop&q=80",
-                  "https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=200&h=200&fit=crop&q=80",
-                  "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=200&h=200&fit=crop&q=80",
-                  "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?w=200&h=200&fit=crop&q=80",
-                  "https://images.unsplash.com/photo-1517836357463-d25dfeac3438?w=200&h=200&fit=crop&q=80",
-                  "https://images.unsplash.com/photo-1594381898411-846e7d193883?w=200&h=200&fit=crop&q=80",
-                ].map((img, idx) => (
-                  <motion.div
-                    key={idx}
-                    className="col-4"
-                    whileHover={{ opacity: 0.9 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    <img
-                      src={img}
-                      alt="Diverse fitness community"
-                      className="img-fluid rounded"
-                      style={{
-                        aspectRatio: "1",
-                        objectFit: "cover",
-                        width: "100%",
-                      }}
-                    />
-                  </motion.div>
-                ))}
-              </motion.div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Surround yourself with the right people Section */}
-      <section className="py-5">
-        <div className="container">
-          <div className="row align-items-center">
-            <div className="col-lg-6">
-              <motion.img
-                src="https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=600&h=400&fit=crop&q=80"
-                alt="Fitness Community"
-                className="img-fluid rounded-4 shadow-lg"
-                initial={{ opacity: 0, scale: 0.8 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                whileHover={{ opacity: 0.9 }}
-              />
-            </div>
-            <div className="col-lg-6 mb-4 mb-lg-0">
-              <motion.div
-                initial={{ opacity: 0, x: -50 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-              >
-                <h2
-                  className="fw-bold mb-4"
-                  style={{ fontSize: "2.5rem", color: "#333" }}
-                >
-                  Surround yourself with the right people
-                </h2>
-                <p className="text-muted mb-4" style={{ fontSize: "1.1rem" }}>
-                  Join a community of like-minded individuals who support and
-                  motivate each other. Your success is our success, and we're
-                  all in this together.
-                </p>
-              </motion.div>
-            </div>
-          </div>
+        <div className="container text-center">
+          <motion.h2
+            className="fw-bold mb-4"
+            style={{ fontSize: "2.5rem", color: "#333" }}
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            viewport={{ once: true }}
+          >
+            Start Your Fitness Journey, One Snap at a Time.
+          </motion.h2>
+          <motion.button
+            className="btn btn-lg rounded-pill px-5 py-3"
+            style={{
+              backgroundColor: "#00C853",
+              color: "#fff",
+              border: "none",
+              minHeight: "52px",
+            }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => navigate("/login")}
+          >
+            👉 Show Off Your Fitness Wins Now
+          </motion.button>
         </div>
       </section>
 
       {/* PWA Install Button - Floating */}
       {showInstallButton && (
-        <motion.button
-          className="position-fixed bottom-0 end-0 m-4 btn btn-primary shadow-lg rounded-pill d-flex align-items-center gap-2 px-4 py-3"
-          style={{
-            zIndex: 1050,
-            minHeight: "56px",
-            backgroundColor: "#00C853",
-            border: "none",
-          }}
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 20 }}
-          transition={{ duration: 0.3 }}
-          onClick={handleInstallClick}
-          whileHover={{ opacity: 0.9 }}
-        >
-          <FaDownload size={20} />
-          <span className="fw-semibold">Install PWA</span>
-        </motion.button>
+  <motion.button
+    className="position-fixed shadow-lg rounded-pill d-flex align-items-center gap-2 px-4 py-3"
+    style={{
+      bottom: "20px",
+      right: "20px",
+      zIndex: 1050,
+      minHeight: "56px",
+      backgroundColor: "#00C853",
+      border: "none",
+      color: "#fff",
+    }}
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: 20 }}
+    transition={{ duration: 0.3 }}
+    onClick={handleInstallClick}
+    whileHover={{ scale: 1.05 }}
+  >
+    <FaDownload size={20} />
+    <span className="fw-semibold">Install App</span>
+  </motion.button>
       )}
 
       {/* Footer */}
-      <footer className="bg-dark text-white pt-4">
+      <footer className="bg-dark text-white pt-5 pb-4">
         <div className="container">
           <div className="row g-4">
             <div className="col-lg-3">
@@ -730,7 +546,7 @@ const LandingPage = () => {
                   href="https://facebook.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  whileHover={{ opacity: 0.8 }}
+                  whileHover={{ scale: 1.2 }}
                 >
                   <FaFacebook
                     size={24}
@@ -741,7 +557,7 @@ const LandingPage = () => {
                   href="https://instagram.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  whileHover={{ opacity: 0.8 }}
+                  whileHover={{ scale: 1.2 }}
                 >
                   <FaInstagram
                     size={24}
@@ -752,7 +568,7 @@ const LandingPage = () => {
                   href="https://linkedin.com"
                   target="_blank"
                   rel="noopener noreferrer"
-                  whileHover={{ opacity: 0.8 }}
+                  whileHover={{ scale: 1.2 }}
                 >
                   <FaLinkedin
                     size={24}
@@ -824,13 +640,12 @@ const LandingPage = () => {
                 </li>
               </ul>
             </div>
-            <hr className="my-4" style={{ borderColor: "#444" }} />
-            <div className="text-center text-white mb-4">
-              <p className="mb-0 text-white bg-white px-2 py-1 rounded">
-                &copy; {new Date().getFullYear()} LevelGrit. All rights
-                reserved.
-              </p>
-            </div>
+          </div>
+          <hr className="my-4" style={{ borderColor: "#444" }} />
+          <div className="text-center text-muted">
+            <p className="mb-0">
+              &copy; {new Date().getFullYear()} LevelGrit. All rights reserved.
+            </p>
           </div>
         </div>
       </footer>
