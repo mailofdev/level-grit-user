@@ -145,6 +145,20 @@ function App() {
                     </ProtectedLayout>
                   }
                 />
+                <Route
+                  path="/client-messages/:trainerId"
+                  element={
+                    <ProtectedLayout
+                      config={{
+                        showTopbar: true,
+                        showSidebar: false,
+                        showFooter: false,
+                      }}
+                    >
+                      <ClientMessages />
+                    </ProtectedLayout>
+                  }
+                />
                 {/* 404 - Catch all unmatched routes */}
                 <Route path="*" element={<NotFound />} />
               </Routes>

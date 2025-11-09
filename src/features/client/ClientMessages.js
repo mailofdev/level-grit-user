@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { FaPaperPlane, FaSmile } from "react-icons/fa";
 import { Form, InputGroup, Button, Card } from "react-bootstrap";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,7 +13,13 @@ import Loader from "../../components/display/Loader";
 
 const ClientMessages = () => {
   const location = useLocation();
-  const { trainerId, clientId, clientName, client } = location.state || {};
+  const params = useParams();
+  
+  // Get data from state (passed from dashboard via getDashboard)
+  const { trainerId: stateTrainerId, clientId: stateClientId, clientName, client } = location.state || {};
+  const trainerId = stateTrainerId || params.trainerId;
+  // Get clientId from state (from getDashboard)
+  const clientId = stateClientId || client?.clientId;
 
   const [trainer, setTrainer] = useState({
     trainerId: trainerId,

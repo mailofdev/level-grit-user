@@ -376,14 +376,14 @@ export default function ClientDashboard() {
                   <button
                     className="bg-white fs-6 btn-sm p-2 d-flex align-items-center border-0 rounded-3 shadow-sm"
                     onClick={() =>
-                     navigate(`/messages/${client.trainerId}`, {
-  state: { 
-    client,
-    trainerId: client.trainerId,
-    clientId: client.clientId,
-    clientName: client.clientName
-  }
-})
+                      navigate(`/client-messages/${client.trainerId}`, {
+                        state: {
+                          client,
+                          trainerId: client.trainerId,
+                          clientId: client.clientId,
+                          clientName: client.clientName,
+                        },
+                      })
                     }
                   >
                     <FaMessage className="me-1" /> Message
