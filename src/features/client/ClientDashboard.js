@@ -1,8 +1,11 @@
-import React, { useState, useRef } from "react";
-import { ProgressBar } from "react-bootstrap";
+import React, { useState, useRef, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import Heading from "../../components/navigation/Heading";
-import ShareProgressModal from "../../components/common/ShareProgressModal"; // Add this import
+import { useDispatch, useSelector } from "react-redux";
+import {
+  getDashboardThunk,
+  uploadMealThunk,
+} from "../../features/client/clientThunks";
+import ShareProgressModal from "../../components/common/ShareProgressModal";
 import {
   FaFire,
   FaCheckCircle,
@@ -17,154 +20,175 @@ import { SplitButton } from "primereact/splitbutton";
 export default function ClientDashboard() {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
+
+  const { dashboard, loading, error } = useSelector((state) => state.client);
+  console.log(dashboard);
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
   const [showCamera, setShowCamera] = useState(false);
-  const [selectedMealIndex, setSelectedMealIndex] = useState(null);
+  const [selectedMeal, setSelectedMeal] = useState(null);
   const [stream, setStream] = useState(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [showShareModal, setShowShareModal] = useState(false); // Add this state
+  const [showShareModal, setShowShareModal] = useState(false);
 
-  const client = { ...location.state?.client };
+  useEffect(() => {
+    dispatch(getDashboardThunk());
+  }, [dispatch]);
 
-  if (!client)
-    return (
-      <p className="text-muted mt-4 text-center">
-        Select a client to view details.
-      </p>
-    );
-
-  const meals = [
-    {
-      name: "Meal 1 (Pre-Workout)",
-      image:
-        "https://media.self.com/photos/5fd796783fd930328ef43628/4:3/w_2240,c_limit/banana-peanut-butter.jpg",
-      calories: 450,
-      protein: 15,
-      carbs: 60,
-      fat: 18,
-      completed: true,
-    },
-    {
-      name: "Meal 2 (Breakfast)",
-      image:
-        "https://www.shutterstock.com/image-photo/milk-breakfast-two-glasses-oatmeal-260nw-1905708703.jpg",
-      calories: 520,
-      protein: 35,
-      carbs: 25,
-      fat: 28,
-      completed: true,
-    },
-    {
-      name: "Meal 3 (Lunch)",
-      image:
-        "https://www.subbuskitchen.com/wp-content/uploads/2014/07/NorthIndian-Lunch-Menu1_Final2.jpg",
-      calories: 280,
-      protein: 8,
-      carbs: 18,
-      fat: 22,
-      completed: true,
-    },
-    {
-      name: "Meal 4 (Evening Snack)",
-      image:
-        "https://i0.wp.com/www.shanazrafiq.com/wp-content/uploads/2022/02/Fruit-Yogurt-Salad-8.jpg?resize=1200%2C798&ssl=1",
-      calories: 625,
-      protein: 42,
-      carbs: 45,
-      fat: 28,
-      completed: true,
-    },
-    {
-      name: "Meal 5 (Dinner)",
-      image:
-        "https://www.indianhealthyrecipes.com/wp-content/uploads/2021/07/paneer-fried-rice-recipe.jpg",
-      calories: 625,
-      protein: 42,
-      carbs: 45,
-      fat: 28,
-      completed: true,
-    },
-    {
-      name: "Meal 6 (Before Bed)",
-      calories: 625,
-      protein: 42,
-      carbs: 45,
-      fat: 28,
-      completed: false,
-    },
-  ];
-
-  const totals = meals.reduce(
-    (acc, meal) => {
-      acc.calories += meal.calories;
-      acc.protein += meal.protein;
-      acc.carbs += meal.carbs;
-      acc.fat += meal.fat;
-      return acc;
-    },
-    { calories: 0, protein: 0, carbs: 0, fat: 0 }
-  );
-
-  const dashboardData = {
-    user: { name: "Alex", streak: 12 },
-    macros: {
-      calories: { value: totals.calories, target: 2500 },
-      protein: { value: totals.protein, target: 200 },
-      carbs: { value: totals.carbs, target: 300 },
-      fat: { value: totals.fat, target: 80 },
-    },
-    streakProgress: { current: 12, goal: 20 },
-    meals,
-    reminders: [
-      {
-        text: "Dinner reminder",
-        time: "6:00 PM - Don't forget your protein!",
-        type: "warning",
-      },
-      {
-        text: "Time for your next glass of water",
-        time: "4:00 PM - Time for your next glass of water",
-        type: "info",
-      },
-    ],
-    water: {
-      current: 6,
-      goal: 8,
-    },
+  // Parse macro strings from "consumed/target" format
+  const parseMacro = (macroString) => {
+    if (!macroString) return { value: 0, target: 0 };
+    const [value, target] = macroString.split("/").map(parseFloat);
+    return { value: value || 0, target: target || 0 };
   };
+
+  // Prepare client and dashboard data from API response
+  const client = dashboard
+    ? {
+        clientId: dashboard.clientId,
+        trainerId: dashboard.trainerId,
+        clientName: dashboard.clientName,
+        fullName: dashboard.clientName,
+        goal: "- - -",
+        startDate: new Date().toLocaleDateString(),
+        status: dashboard.currentStreakDays >= 3 ? "on-track" : "attention",
+        streak:
+          dashboard.currentStreakDays > 0
+            ? `${dashboard.currentStreakDays} days`
+            : "Missed meal",
+      }
+    : null;
+
+  // Prepare dashboard data from API response
+  const dashboardData = dashboard
+    ? {
+        user: {
+          name: dashboard.clientName || "Client",
+          streak: dashboard.currentStreakDays || 0,
+        },
+        macros: {
+          calories: parseMacro(dashboard.totalMacros?.calories),
+          protein: parseMacro(dashboard.totalMacros?.protein),
+          carbs: parseMacro(dashboard.totalMacros?.carbs),
+          fat: parseMacro(dashboard.totalMacros?.fat),
+        },
+        streakProgress: { current: dashboard.currentStreakDays || 0, goal: 20 },
+        meals: [],
+        reminders: [],
+        water: { current: 6, goal: 8 },
+      }
+    : null;
+
+  // Match uploaded meals with planned meals
+  if (dashboard) {
+    const uploadedMealsMap = {};
+    (dashboard.meals || []).forEach((meal) => {
+      uploadedMealsMap[meal.mealName.toLowerCase().trim()] = meal;
+    });
+
+    dashboardData.meals = (dashboard.plannedMeals || []).map(
+      (planned, index) => {
+        const uploadedMeal =
+          uploadedMealsMap[planned.mealName.toLowerCase().trim()];
+
+        return {
+          name: `Meal ${index + 1} (${planned.mealName})`,
+          mealName: planned.mealName,
+          uploadId: planned.uploadId,
+          // Show uploaded image if completed, otherwise show planned image
+          image: uploadedMeal?.base64Image
+            ? `data:image/jpeg;base64,${uploadedMeal.base64Image}`
+            : planned.base64Image
+            ? `data:image/jpeg;base64,${planned.base64Image}`
+            : null,
+          // Show actual consumed values if completed, otherwise show planned values
+          calories: uploadedMeal
+            ? Math.round(uploadedMeal.calories)
+            : Math.round(planned.calories),
+          protein: uploadedMeal
+            ? Math.round(uploadedMeal.protein)
+            : Math.round(planned.protein),
+          carbs: uploadedMeal
+            ? Math.round(uploadedMeal.carbs)
+            : Math.round(planned.carbs),
+          fat: uploadedMeal
+            ? Math.round(uploadedMeal.fat)
+            : Math.round(planned.fat),
+          completed: !!uploadedMeal,
+          // Store both planned and actual for reference
+          plannedCalories: Math.round(planned.calories),
+          plannedProtein: Math.round(planned.protein),
+          plannedCarbs: Math.round(planned.carbs),
+          plannedFat: Math.round(planned.fat),
+        };
+      }
+    );
+  }
+
+  if (loading && !dashboard) {
+    return (
+      <div className="container">
+        <div className="text-center py-5">
+          <div className="spinner-border text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="mt-3">Loading your dashboard...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="container">
+        <p className="text-danger text-center mt-5">{error}</p>
+      </div>
+    );
+  }
+
+  if (!dashboardData || !client) {
+    return (
+      <div className="container">
+        <p className="text-muted mt-4 text-center">Loading dashboard data...</p>
+      </div>
+    );
+  }
 
   const completedMeals = dashboardData.meals.filter((m) => m.completed).length;
   const remainingMeals = dashboardData.meals.length - completedMeals;
 
   // Prepare data for ShareProgressModal
-  const shareClientData = {
-    name: client.fullName || "Alex",
-    streak: dashboardData.streakProgress.current,
-    streakCurrent: dashboardData.streakProgress.current,
-    streakGoal: dashboardData.streakProgress.goal,
-    completedMeals: completedMeals,
-    totalMeals: dashboardData.meals.length,
-    macros: [
-      {
-        label: 'calories',
-        value: dashboardData.macros.calories.value,
-        target: dashboardData.macros.calories.target
-      },
-      {
-        label: 'protein',
-        value: dashboardData.macros.protein.value,
-        target: dashboardData.macros.protein.target
-      }
-    ]
-  };
+  const shareClientData =
+    client && dashboardData
+      ? {
+          name: client.clientName || "Client",
+          streak: dashboardData.streakProgress.current,
+          streakCurrent: dashboardData.streakProgress.current,
+          streakGoal: dashboardData.streakProgress.goal,
+          completedMeals: completedMeals,
+          totalMeals: dashboardData.meals.length,
+          macros: [
+            {
+              label: "calories",
+              value: dashboardData.macros.calories.value,
+              target: dashboardData.macros.calories.target,
+            },
+            {
+              label: "protein",
+              value: dashboardData.macros.protein.value,
+              target: dashboardData.macros.protein.target,
+            },
+          ],
+        }
+      : null;
 
   // Handle meal click - open camera for incomplete meals
-  const handleMealClick = (mealIndex) => {
-    if (!meals[mealIndex].completed) {
-      setSelectedMealIndex(mealIndex);
+  const handleMealClick = (meal) => {
+    if (!meal.completed) {
+      setSelectedMeal(meal);
       setShowCamera(true);
       startCamera();
     }
@@ -184,6 +208,7 @@ export default function ClientDashboard() {
     } catch (error) {
       console.error("Error accessing camera:", error);
       alert("Unable to access camera. Please check permissions.");
+      setShowCamera(false);
     }
   };
 
@@ -195,9 +220,9 @@ export default function ClientDashboard() {
     }
   };
 
-  // Capture photo and convert to base64
-  const capturePhoto = () => {
-    if (!videoRef.current || !canvasRef.current) return;
+  // Capture photo and upload
+  const capturePhoto = async () => {
+    if (!videoRef.current || !canvasRef.current || !selectedMeal) return;
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -212,42 +237,26 @@ export default function ClientDashboard() {
 
     // Convert to base64
     const base64Image = canvas.toDataURL("image/jpeg", 0.8);
-    
-    // Remove the data:image/jpeg;base64, prefix for API
     const base64Data = base64Image.split(",")[1];
 
-    // Send to API
-    sendToAPI(base64Data);
-  };
-
-  // Send image to API
-  const sendToAPI = async (base64Image) => {
+    // Upload via Redux thunk
     setIsProcessing(true);
-    
     try {
-      const response = await fetch("https://localhost:7240/api/Integration/extract", {
-        method: "POST",
-        headers: {
-          "accept": "text/plain",
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          message: ``,
-          image: base64Image,
-        }),
-      });
+      await dispatch(
+        uploadMealThunk({
+          mealPlanId: selectedMeal.uploadId,
+          mealName: selectedMeal.mealName,
+          message: "Meal image uploaded",
+          imageBase64: base64Data,
+        })
+      ).unwrap();
 
-      if (response.ok) {
-        const result = await response.text();
-        console.log("API Response:", result);
-        alert("Meal image uploaded successfully!");
-        closeCamera();
-      } else {
-        throw new Error("API request failed");
-      }
-    } catch (error) {
-      console.error("Error sending to API:", error);
-      alert("Failed to upload meal image. Please try again.");
+      alert("✅ Meal uploaded successfully!");
+      closeCamera();
+      dispatch(getDashboardThunk()); // Refresh dashboard
+    } catch (err) {
+      console.error("Error uploading meal:", err);
+      alert("❌ Failed to upload meal image: " + (err.message || err));
     } finally {
       setIsProcessing(false);
     }
@@ -257,7 +266,7 @@ export default function ClientDashboard() {
   const closeCamera = () => {
     stopCamera();
     setShowCamera(false);
-    setSelectedMealIndex(null);
+    setSelectedMeal(null);
   };
 
   const CircularProgress = ({
@@ -268,7 +277,7 @@ export default function ClientDashboard() {
     target,
     color = "success",
   }) => {
-    const percentage = Math.round((current / target) * 100);
+    const percentage = target > 0 ? Math.round((current / target) * 100) : 0;
     const circumference = 2 * Math.PI * 45;
     const strokeDasharray = `${
       (percentage / 100) * circumference
@@ -312,13 +321,12 @@ export default function ClientDashboard() {
         </div>
         <h6 className="mb-1 text-capitalize fw-semibold">{label}</h6>
         <small className="text-muted">
-          {current} / {target}
+          {Math.round(current)} / {target}
         </small>
       </div>
     );
   };
 
-  // Updated handleShare function to open modal
   const handleShare = () => {
     setShowShareModal(true);
   };
@@ -356,7 +364,7 @@ export default function ClientDashboard() {
                         : "text-success"
                     }`}
                   >
-                    {client.streak}
+                    {dashboardData.streakProgress.current} day streak
                   </span>
                   {client.streak === "Missed meal" ? (
                     <FaSadCry className="text-danger ms-2" />
@@ -368,9 +376,14 @@ export default function ClientDashboard() {
                   <button
                     className="bg-white fs-6 btn-sm p-2 d-flex align-items-center border-0 rounded-3 shadow-sm"
                     onClick={() =>
-                      navigate(`/messages/${client.clientId}`, {
-                        state: { client },
-                      })
+                     navigate(`/messages/${client.trainerId}`, {
+  state: { 
+    client,
+    trainerId: client.trainerId,
+    clientId: client.clientId,
+    clientName: client.clientName
+  }
+})
                     }
                   >
                     <FaMessage className="me-1" /> Message
@@ -506,7 +519,7 @@ export default function ClientDashboard() {
                         cursor: meal.completed ? "default" : "pointer",
                         pointerEvents: meal.completed ? "none" : "auto",
                       }}
-                      onClick={() => handleMealClick(idx)}
+                      onClick={() => handleMealClick(meal)}
                     >
                       <div className="d-flex justify-content-between align-items-center mb-2">
                         <h6 className="fw-semibold mb-1">{meal.name}</h6>
@@ -521,21 +534,40 @@ export default function ClientDashboard() {
                         className="rounded-3 overflow-hidden mb-2"
                         style={{ height: "120px" }}
                       >
-                        {meal.image && (
+                        {meal.image ? (
                           <img
                             src={meal.image}
                             alt={meal.name}
                             className="img-fluid w-100 h-100 object-fit-cover"
+                            style={{ opacity: meal.completed ? 1 : 0.7 }}
                           />
+                        ) : (
+                          <div className="d-flex align-items-center justify-content-center h-100 bg-light">
+                            <FaCamera
+                              className="text-muted"
+                              style={{ fontSize: "2rem" }}
+                            />
+                          </div>
                         )}
                       </div>
 
                       <p className="mb-1 small text-muted">
                         {meal.calories} calories
+                        {meal.completed && meal.plannedCalories && (
+                          <span className="text-success ms-1">
+                            (Target: {meal.plannedCalories})
+                          </span>
+                        )}
                       </p>
                       <div className="small text-muted">
                         P: {meal.protein}g | C: {meal.carbs}g | F: {meal.fat}g
                       </div>
+                      {meal.completed && (
+                        <div className="small text-success mt-1">
+                          <FaCheckCircle className="me-1" />
+                          Completed
+                        </div>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -554,11 +586,12 @@ export default function ClientDashboard() {
             zIndex: 9999,
           }}
         >
-          <div className="bg-white rounded-4 p-4" style={{ maxWidth: "600px", width: "90%" }}>
+          <div
+            className="bg-white rounded-4 p-4"
+            style={{ maxWidth: "600px", width: "90%" }}
+          >
             <div className="d-flex justify-content-between align-items-center mb-3">
-              <h5 className="mb-0">
-                Capture {selectedMealIndex !== null && meals[selectedMealIndex].name}
-              </h5>
+              <h5 className="mb-0">Capture {selectedMeal?.name}</h5>
               <button
                 className="btn btn-link text-dark p-0"
                 onClick={closeCamera}
@@ -611,11 +644,13 @@ export default function ClientDashboard() {
       )}
 
       {/* Share Progress Modal */}
-      <ShareProgressModal
-        show={showShareModal}
-        onHide={() => setShowShareModal(false)}
-        clientData={shareClientData}
-      />
+      {shareClientData && (
+        <ShareProgressModal
+          show={showShareModal}
+          onHide={() => setShowShareModal(false)}
+          clientData={shareClientData}
+        />
+      )}
     </div>
   );
 }

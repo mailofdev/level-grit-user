@@ -1,103 +1,111 @@
+// src/features/client/clientSlice.js
 import { createSlice } from "@reduxjs/toolkit";
-import { getTrainerDashboardThunk, deleteTrainerThunk } from "./clientThunks";
+import { getDashboardThunk, uploadMealThunk } from "./clientThunks";
 
 const initialState = {
-  dashboardData: null,
-  loading: false,
-  error: null,
+  dashboard: null,          // Client dashboard data
+  loading: false,           // Loading state for both dashboard & upload
+  error: null,              // Error message (if any)
+  uploadSuccess: false,     // Meal upload status
 };
 
-const ClientSlice = createSlice({
-  name: "trainer",
+const clientSlice = createSlice({
+  name: "client",
   initialState,
   reducers: {
-    clearError: (state) => {
+    clearError(state) {
       state.error = null;
     },
-    clearLoading: (state) => {
-      state.loading = false;
+    resetUploadState(state) {
+      state.uploadSuccess = false;
     },
-    resetTrainerState: () => initialState,
+    resetClientState() {
+      return initialState;
+    },
   },
   extraReducers: (builder) => {
     builder
-      // --- Pending ---
-      .addCase(getTrainerDashboardThunk.pending, (state) => {
+      // ============================================================
+      // ✅ FETCH DASHBOARD
+      // ============================================================
+      .addCase(getDashboardThunk.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-
-      // --- Fulfilled ---
-      .addCase(getTrainerDashboardThunk.fulfilled, (state, action) => {
+      .addCase(getDashboardThunk.fulfilled, (state, action) => {
         state.loading = false;
         const payload = action.payload || {};
 
-        // ✅ Normalize payload structure to ensure consistency
-        const normalized = {
-          totalClients:
-            payload.totalClients ||
-            payload.totalClientsCount ||
-            payload.clientsCount ||
+        // ✅ Normalize & structure dashboard response
+        state.dashboard = {
+          clientName:
+            payload.clientName ||
+            payload.fullName ||
+            payload.name ||
+            "Client",
+          currentStreakDays:
+            payload.currentStreakDays ||
+            payload.streakDays ||
+            payload.currentStreak ||
             0,
-          onTrackClients:
-            payload.onTrackClients ||
-            payload.onTrackCount ||
-            payload.onTrack ||
-            0,
-          needAttentionClients:
-            payload.needAttentionClients ||
-            payload.needAttentionCount ||
-            payload.attentionCount ||
-            0,
-          overallProgressPercent:
-            payload.overallProgressPercent ||
-            payload.overallProgress ||
-            0,
-          goalsBreakdown: payload.goalsBreakdown || [],
-          clientsNeedingAttention: payload.clientsNeedingAttention || [],
+          totalMacros: payload.totalMacros || {
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0,
+          },
+          plannedMeals: payload.plannedMeals || [],
+          meals: payload.meals || [],
         };
 
-        state.dashboardData = normalized;
         state.error = null;
       })
-
-      // --- Rejected ---
-      .addCase(getTrainerDashboardThunk.rejected, (state, action) => {
+      .addCase(getDashboardThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Failed to load trainer dashboard";
-        state.dashboardData = null;
+        state.error =
+          action.payload || "Failed to fetch client dashboard data";
       })
 
-      // --- DELETE TRAINER THUNK ---
-      // Pending
-      .addCase(deleteTrainerThunk.pending, (state) => {
+      // ============================================================
+      // ✅ UPLOAD MEAL
+      // ============================================================
+      .addCase(uploadMealThunk.pending, (state) => {
         state.loading = true;
+        state.uploadSuccess = false;
         state.error = null;
       })
-
-      // Fulfilled
-      .addCase(deleteTrainerThunk.fulfilled, (state) => {
+      .addCase(uploadMealThunk.fulfilled, (state, action) => {
         state.loading = false;
-        state.error = null;
-        // Reset trainer state after successful deletion
-        state.dashboardData = null;
+        state.uploadSuccess = true;
+
+        // Optionally append new meal data into dashboard
+        if (state.dashboard?.meals && action.payload) {
+          state.dashboard.meals = [
+            ...state.dashboard.meals,
+            action.payload,
+          ];
+        }
       })
-
-      // Rejected
-      .addCase(deleteTrainerThunk.rejected, (state, action) => {
+      .addCase(uploadMealThunk.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Failed to delete trainer account";
+        state.error =
+          action.payload || "Failed to upload meal image";
       });
   },
 });
 
-export const { clearError, clearLoading, resetTrainerState } =
-  ClientSlice.actions;
+// ✅ Export actions
+export const { clearError, resetUploadState, resetClientState } =
+  clientSlice.actions;
 
-export default ClientSlice.reducer;
+// ✅ Export reducer
+export default clientSlice.reducer;
 
-// ✅ Selectors
-export const selectTrainer = (state) => state.trainer;
-export const selectDashboardData = (state) => state.trainer.dashboardData;
-export const selectTrainerLoading = (state) => state.trainer.loading;
-export const selectTrainerError = (state) => state.trainer.error;
+// ============================================================
+// ✅ SELECTORS
+// ============================================================
+export const selectClient = (state) => state.client;
+export const selectDashboard = (state) => state.client.dashboard;
+export const selectClientLoading = (state) => state.client.loading;
+export const selectClientError = (state) => state.client.error;
+export const selectUploadSuccess = (state) => state.client.uploadSuccess;

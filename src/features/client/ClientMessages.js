@@ -1,23 +1,27 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useLocation } from "react-router-dom";
 import { FaPaperPlane, FaSmile } from "react-icons/fa";
 import { Form, InputGroup, Button, Card } from "react-bootstrap";
 import { motion, AnimatePresence } from "framer-motion";
 import EmojiPicker from "emoji-picker-react";
 import Heading from "../../components/navigation/Heading";
-import { getDecryptedUser } from "../../components/common/CommonFunctions";
 import {
-  getTrainerForClient,
   sendMessageToTrainer,
   subscribeToTrainerMessages,
 } from "./clientMessageService";
 import Loader from "../../components/display/Loader";
 
 const ClientMessages = () => {
-  const user = getDecryptedUser();
-  // Get clientId - try multiple possible field names
-  const clientId = user?.userId || user?.clientId || user?.id;
-  
-  const [trainer, setTrainer] = useState(null);
+  const location = useLocation();
+  const { trainerId, clientId, clientName, client } = location.state || {};
+
+  const [trainer, setTrainer] = useState({
+    trainerId: trainerId,
+    fullName: "Your Trainer",
+    email: "",
+    phoneNumber: "",
+  });
+
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -25,78 +29,38 @@ const ClientMessages = () => {
   const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
 
-  // Fetch trainer information
+  // Subscribe to messages (realtime)
   useEffect(() => {
-    const fetchTrainer = async () => {
-      if (!clientId) {
-        setError("Client ID not found");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        // First check if user object has trainerId directly
-        if (user?.trainerId) {
-          setTrainer({
-            trainerId: user.trainerId,
-            fullName: user.trainerName || "Your Trainer",
-            email: user.trainerEmail || "",
-            phoneNumber: user.trainerPhone || "",
-            profileImage: null,
-          });
-          setLoading(false);
-          return;
-        }
-
-        // Otherwise fetch from API
-        const trainerData = await getTrainerForClient(clientId);
-        setTrainer(trainerData);
-      } catch (err) {
-        console.error("Error fetching trainer:", err);
-        setError("Failed to load trainer information");
-        setLoading(false);
-      }
-    };
-
-    fetchTrainer();
-  }, [clientId, user]);
-
-  // Subscribe to messages
-  useEffect(() => {
-    if (!trainer?.trainerId || !clientId) {
-      if (trainer && clientId) {
-        setLoading(false);
-      }
+    if (!trainerId || !clientId) {
+      setError("Missing trainer or client information");
+      setLoading(false);
       return;
     }
 
-    console.log("Subscribing to messages:", { trainerId: trainer.trainerId, clientId });
-    
-    const unsubscribe = subscribeToTrainerMessages(
-      trainer.trainerId,
-      clientId,
-      (msgs) => {
-        console.log("Received messages:", msgs);
-        setMessages(msgs);
-        setLoading(false);
-      }
-    );
+    console.log("Subscribing to messages:", { trainerId, clientId });
+
+    const unsubscribe = subscribeToTrainerMessages(trainerId, clientId, (msgs) => {
+      console.log("Received messages:", msgs);
+      setMessages(msgs);
+      setLoading(false);
+    });
 
     return () => unsubscribe();
-  }, [trainer?.trainerId, clientId]);
+  }, [trainerId, clientId]);
 
   // Send message
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!newMessage.trim() || !trainer?.trainerId || !clientId) return;
+    if (!newMessage.trim() || !trainerId || !clientId) return;
 
     try {
-      console.log("Sending message:", { trainerId: trainer.trainerId, clientId, message: newMessage.trim() });
-      await sendMessageToTrainer(
-        trainer.trainerId,
+      console.log("Sending message:", {
+        trainerId,
         clientId,
-        newMessage.trim()
-      );
+        message: newMessage.trim(),
+      });
+
+      await sendMessageToTrainer(trainerId, clientId, newMessage.trim());
       setNewMessage("");
       setError(null);
     } catch (err) {
@@ -105,7 +69,7 @@ const ClientMessages = () => {
     }
   };
 
-  // Scroll to bottom
+  // Scroll to bottom on new message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -120,13 +84,7 @@ const ClientMessages = () => {
 
   // Loading state
   if (loading) {
-    return (
-      <Loader
-        fullScreen
-        text="Loading messages..."
-        color="var(--color-primary)"
-      />
-    );
+    return <Loader fullScreen text="Loading messages..." color="var(--color-primary)" />;
   }
 
   // Error state
@@ -137,21 +95,6 @@ const ClientMessages = () => {
         <Card className="border-0 shadow-lg mt-4">
           <Card.Body className="text-center py-5">
             <p className="text-danger mb-0">{error}</p>
-          </Card.Body>
-        </Card>
-      </div>
-    );
-  }
-
-  if (!trainer) {
-    return (
-      <div className="container py-3">
-        <Heading pageName="Messages" sticky={true} />
-        <Card className="border-0 shadow-lg mt-4">
-          <Card.Body className="text-center py-5">
-            <p className="text-muted mb-0">
-              No trainer assigned. Please contact support.
-            </p>
           </Card.Body>
         </Card>
       </div>
@@ -206,7 +149,9 @@ const ClientMessages = () => {
                 <h6 className="text-white mb-0 fw-bold">
                   {trainer.fullName || "Trainer"}
                 </h6>
-                <small className="text-white-50">Your trainer</small>
+                <small className="text-white-50">
+                  Chatting as {clientName || "Client"}
+                </small>
               </div>
             </div>
           </div>
@@ -222,9 +167,7 @@ const ClientMessages = () => {
             {messages.length === 0 ? (
               <div className="text-center text-muted mt-5">
                 <p>No messages yet. Start the conversation! 💬</p>
-                <small className="text-muted">
-                  Send a message to your trainer to get started.
-                </small>
+                <small>Send a message to your trainer to get started.</small>
               </div>
             ) : (
               <AnimatePresence>
@@ -246,9 +189,6 @@ const ClientMessages = () => {
                         style={{
                           maxWidth: "70%",
                           wordBreak: "break-word",
-                          backgroundColor: isSender
-                            ? "linear-gradient(135deg, #00C853 0%, #00B248 100%)"
-                            : "#ffffff",
                           background: isSender
                             ? "linear-gradient(135deg, #00C853 0%, #00B248 100%)"
                             : "#ffffff",
@@ -262,18 +202,24 @@ const ClientMessages = () => {
                       >
                         <div style={{ fontSize: "0.95rem" }}>{msg.text}</div>
                         <div
-                          className={`text-muted ${isSender ? "text-end" : "text-start"}`}
+                          className={`text-muted ${
+                            isSender ? "text-end" : "text-start"
+                          }`}
                           style={{
                             fontSize: "0.75rem",
                             marginTop: "4px",
-                            color: isSender ? "rgba(255,255,255,0.8)" : "#666",
+                            color: isSender
+                              ? "rgba(255,255,255,0.8)"
+                              : "#666",
                           }}
                         >
                           {msg.timestamp?.toDate
-                            ? msg.timestamp.toDate().toLocaleTimeString([], {
-                                hour: "2-digit",
-                                minute: "2-digit",
-                              })
+                            ? msg.timestamp
+                                .toDate()
+                                .toLocaleTimeString([], {
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                })
                             : new Date(msg.timestamp).toLocaleTimeString([], {
                                 hour: "2-digit",
                                 minute: "2-digit",
@@ -321,10 +267,7 @@ const ClientMessages = () => {
 
             <Form onSubmit={handleSubmit}>
               <InputGroup className="align-items-center">
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                >
+                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                   <Button
                     variant="light"
                     className="rounded-circle me-2 border-0 shadow-sm d-flex align-items-center justify-content-center"
@@ -332,8 +275,6 @@ const ClientMessages = () => {
                       width: "45px",
                       height: "45px",
                       backgroundColor: "#00C853",
-                      minWidth: "45px",
-                      minHeight: "45px",
                     }}
                     onClick={() => setShowEmojiPicker((prev) => !prev)}
                     type="button"
@@ -343,7 +284,7 @@ const ClientMessages = () => {
                 </motion.div>
 
                 <Form.Control
-                  placeholder="Type a message to your trainer..."
+                  placeholder="Type a message..."
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   className="rounded-pill border-0 shadow-sm px-4 py-2"
@@ -354,10 +295,7 @@ const ClientMessages = () => {
                   }}
                 />
 
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.9 }}
-                >
+                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
                   <Button
                     type="submit"
                     variant="primary"
@@ -365,8 +303,6 @@ const ClientMessages = () => {
                     style={{
                       width: "45px",
                       height: "45px",
-                      minWidth: "45px",
-                      minHeight: "45px",
                       backgroundColor: "#00C853",
                     }}
                     disabled={!newMessage.trim()}
@@ -401,4 +337,3 @@ const ClientMessages = () => {
 };
 
 export default ClientMessages;
-

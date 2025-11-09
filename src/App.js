@@ -138,7 +138,7 @@ function App() {
                   }
                 />
                 <Route
-                  path="/messages/:clientId"
+                  path="/messages/:trainerId"
                   element={
                     <ProtectedLayout>
                       <Messages isTrainer={true} />
