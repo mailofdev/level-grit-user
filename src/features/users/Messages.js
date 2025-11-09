@@ -1,70 +1,93 @@
 import React, { useState, useEffect, useRef } from "react";
-import { FaPaperPlane, FaSmile } from "react-icons/fa";
-import { Form, InputGroup, Button, Card } from "react-bootstrap";
-import { motion, AnimatePresence } from "framer-motion";
-import EmojiPicker from "emoji-picker-react";
+import { useLocation, useParams } from "react-router-dom";
+import { Card } from "react-bootstrap";
+import { motion } from "framer-motion";
 import Heading from "../../components/navigation/Heading";
-import { useLocation } from "react-router-dom";
 import { sendMessage, subscribeToMessages } from "../../config/chatService";
 import { getDecryptedUser } from "../../components/common/CommonFunctions";
 import Loader from "../../components/display/Loader";
+import ClientMessagesUI from "./ClientMessagesUI";
+import TrainerMessagesUI from "./TrainerMessagesUI";
 
 export default function Messages({ isTrainer = false }) {
   const location = useLocation();
-  const client = location.state?.client;
-  const trainer = location.state?.trainer;
+  const params = useParams();
   const loggedInUser = getDecryptedUser();
 
-  // Trainer & Client IDs depend on who is logged in
-  // When isTrainer is true: trainerId = logged-in trainer's ID, clientId = selected client's ID
-  // When isTrainer is false: trainerId = selected trainer's ID, clientId = logged-in client's ID
-  const trainerId = isTrainer 
-    ? (loggedInUser?.userId || loggedInUser?.id || loggedInUser?.trainerId)
-    : (trainer?.trainerId || trainer?.userId || trainer?.id);
-  const clientId = isTrainer 
-    ? (client?.clientId || client?.userId || client?.id)
-    : (loggedInUser?.userId || loggedInUser?.clientId || loggedInUser?.id);
+  // Get data from navigation state or URL params
+  const {
+    client,
+    trainer,
+    trainerId: stateTrainerId,
+    clientId: stateClientId,
+    clientName,
+  } = location.state || {};
+
+  // Determine trainerId and clientId based on who is logged in
+  let trainerId, clientId;
+
+  if (isTrainer) {
+    // Trainer view: trainerId = logged-in trainer, clientId = selected client
+    trainerId = loggedInUser?.userId || loggedInUser?.id || loggedInUser?.trainerId;
+    clientId = stateClientId || client?.clientId || client?.userId || client?.id;
+  } else {
+    // Client view: trainerId = selected trainer, clientId = logged-in client
+    trainerId = stateTrainerId || params.trainerId || trainer?.trainerId || trainer?.userId || trainer?.id;
+    clientId = stateClientId || client?.clientId || loggedInUser?.userId || loggedInUser?.clientId || loggedInUser?.id;
+  }
 
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
 
-  // Fetch messages
+  // Subscribe to messages (real-time updates)
   useEffect(() => {
     if (!trainerId || !clientId) {
       console.log("Missing IDs for messages:", { trainerId, clientId, isTrainer, client, trainer, loggedInUser });
-      if (trainerId && clientId) {
-        setLoading(false);
-      }
+      setError("Missing trainer or client information");
+      setLoading(false);
       return;
     }
-    
-    console.log("Subscribing to messages (trainer view):", { trainerId, clientId });
+
+    console.log(`Subscribing to messages (${isTrainer ? "trainer" : "client"} view):`, { trainerId, clientId });
+
     const unsubscribe = subscribeToMessages(trainerId, clientId, (msgs) => {
-      console.log("Received messages (trainer view):", msgs);
+      console.log("Received messages:", msgs);
       setMessages(msgs);
       setLoading(false);
+      setError(null);
     });
+
     return () => unsubscribe();
-  }, [trainerId, clientId]);
+  }, [trainerId, clientId, isTrainer]);
 
   // Send message
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!newMessage.trim() || !trainerId || !clientId) return;
+
     const senderId = isTrainer ? trainerId : clientId;
-    console.log("Sending message (trainer view):", { trainerId, clientId, senderId, message: newMessage.trim() });
+    console.log(`Sending message (${isTrainer ? "trainer" : "client"} view):`, {
+      trainerId,
+      clientId,
+      senderId,
+      message: newMessage.trim(),
+    });
+
     try {
       await sendMessage(trainerId, clientId, senderId, newMessage.trim());
       setNewMessage("");
+      setError(null);
     } catch (err) {
       console.error("Error sending message:", err);
+      setError("Failed to send message. Please try again.");
     }
   };
 
-  // Scroll to bottom
+  // Scroll to bottom on new message
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -73,20 +96,29 @@ export default function Messages({ isTrainer = false }) {
     setNewMessage((prev) => prev + emojiData.emoji);
   };
 
-  const chatName = isTrainer
-    ? `Chat with ${client?.fullName || "Client"}`
-    : `Chat with ${trainer?.fullName || "Trainer"}`;
+  // Determine chat name
+  const otherPersonName = isTrainer
+    ? client?.fullName || client?.clientName || client?.name || "Client"
+    : trainer?.fullName || trainer?.name || "Trainer";
+  
+  const chatName = `Chat with ${otherPersonName}`;
 
-  // Loader
+  // Loading state
   if (loading) {
-    return <Loader fullScreen text="Fetching Messages..." color="#0d6efd" />;
+    return <Loader fullScreen text="Loading messages..." color="var(--color-primary)" />;
   }
 
-  if ((!client && isTrainer) || (!trainer && !isTrainer)) {
+  // Error state
+  if (error && (!trainerId || !clientId)) {
     return (
-      <p className="text-muted mt-4 text-center">
-        Select {isTrainer ? "a client" : "a trainer"} to view messages.
-      </p>
+      <div className="container py-3">
+        <Heading pageName="Messages" sticky={true} />
+        <Card className="border-0 shadow-lg mt-4">
+          <Card.Body className="text-center py-5">
+            <p className="text-danger mb-0">{error}</p>
+          </Card.Body>
+        </Card>
+      </div>
     );
   }
 
@@ -99,160 +131,55 @@ export default function Messages({ isTrainer = false }) {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <Card
-          className="border-0 shadow-lg d-flex flex-column mb-5"
-          style={{
-            height: "calc(100vh - 160px)",
-            borderRadius: "16px",
-            overflow: "hidden",
-            background: "linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%)"
-          }}
-        >
-        {/* Chat Messages */}
-        <div
-          className="flex-grow-1 overflow-auto p-3"
-          style={{
-            background:
-              "linear-gradient(180deg, #e0f7fa 0%, #ffffff 60%, #e8f5e9 100%)",
-          }}
-        >
-          {messages.length === 0 ? (
-            <div className="text-center text-muted mt-5">
-              <p>No messages yet. Start the conversation! 💬</p>
-            </div>
-          ) : (
-            <AnimatePresence>
-              {messages.map((msg, idx) => {
-                const isSender = msg.senderId === (isTrainer ? trainerId : clientId);
-                return (
-                  <motion.div
-                    key={msg.id}
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.3, delay: idx * 0.05 }}
-                    className={`d-flex mb-3 ${
-                      isSender ? "justify-content-end" : "justify-content-start"
-                    }`}
-                  >
-                    <motion.div
-                      className="p-3 rounded-4 shadow-sm"
-                      style={{
-                        maxWidth: "70%",
-                        wordBreak: "break-word",
-                        backgroundColor: isSender 
-                          ? "linear-gradient(135deg, #00C853 0%, #00B248 100%)" 
-                          : "#ffffff",
-                        background: isSender 
-                          ? "linear-gradient(135deg, #00C853 0%, #00B248 100%)" 
-                          : "#ffffff",
-                        borderRadius: isSender
-                          ? "20px 20px 0 20px"
-                          : "20px 20px 20px 0",
-                        border: isSender ? "none" : "1px solid rgba(0,0,0,0.1)"
-                      }}
-                      whileHover={{ scale: 1.02 }}
-                    >
-                      <div style={{ fontSize: "0.95rem", color: "#333" }}>{msg.text}</div>
-                      <div
-                        className={`text-muted ${isSender ? "text-end" : "text-start"}`}
-                        style={{ fontSize: "0.75rem", marginTop: "4px" }}
-                      >
-                        {msg.timestamp?.toDate().toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </div>
-                    </motion.div>
-                  </motion.div>
-                );
-              })}
-            </AnimatePresence>
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Message Input */}
-        <motion.div 
-          className="bg-light p-3 position-relative border-top"
-          style={{ background: "linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%)" }}
-          initial={{ y: 50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ delay: 0.3 }}
-        >
-          <AnimatePresence>
-            {showEmojiPicker && (
-              <motion.div
-                initial={{ opacity: 0, y: 10, scale: 0.9 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.9 }}
-                className="position-absolute"
-                style={{
-                  bottom: "70px",
-                  left: "10px",
-                  zIndex: 1000,
-                  boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-                  borderRadius: "16px",
-                  overflow: "hidden"
-                }}
-              >
-                <EmojiPicker onEmojiClick={onEmojiClick} />
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          <Form onSubmit={handleSubmit}>
-            <InputGroup className="align-items-center">
-              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                <Button
-                  variant="light"
-                  className="rounded-circle me-2 border-0 shadow-sm d-flex align-items-center justify-content-center"
-                  style={{
-                    width: "45px",
-                    height: "45px",
-                    backgroundColor: "#00C853",
-                    minWidth: "45px",
-                    minHeight: "45px"
-                  }}
-                  onClick={() => setShowEmojiPicker((prev) => !prev)}
-                >
-                  <FaSmile size={20} color="white" />
-                </Button>
-              </motion.div>
-
-              <Form.Control
-                placeholder="Type a message..."
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                className="rounded-pill border-0 shadow-sm px-4 py-2"
-                style={{
-                  backgroundColor: "#ffffff",
-                  fontSize: "1rem",
-                  minHeight: "45px"
-                }}
-              />
-
-              <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }}>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  className="rounded-circle ms-2 border-0 shadow-sm d-flex align-items-center justify-content-center"
-                  style={{ 
-                    width: "45px", 
-                    height: "45px",
-                    minWidth: "45px",
-                    minHeight: "45px",
-                    backgroundColor: "#4CAF50"
-                  }}
-                >
-                  <FaPaperPlane />
-                </Button>
-              </motion.div>
-            </InputGroup>
-          </Form>
-        </motion.div>
-      </Card>
+        {isTrainer ? (
+          <TrainerMessagesUI
+            client={client}
+            messages={messages}
+            newMessage={newMessage}
+            setNewMessage={setNewMessage}
+            showEmojiPicker={showEmojiPicker}
+            setShowEmojiPicker={setShowEmojiPicker}
+            onEmojiClick={onEmojiClick}
+            handleSubmit={handleSubmit}
+            messagesEndRef={messagesEndRef}
+            error={error}
+            trainerId={trainerId}
+          />
+        ) : (
+          <ClientMessagesUI
+            trainer={trainer}
+            clientName={clientName || loggedInUser?.fullName}
+            messages={messages}
+            newMessage={newMessage}
+            setNewMessage={setNewMessage}
+            showEmojiPicker={showEmojiPicker}
+            setShowEmojiPicker={setShowEmojiPicker}
+            onEmojiClick={onEmojiClick}
+            handleSubmit={handleSubmit}
+            messagesEndRef={messagesEndRef}
+            error={error}
+            clientId={clientId}
+          />
+        )}
       </motion.div>
+
+      {/* Error Alert */}
+      {error && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="alert alert-danger alert-dismissible fade show"
+          role="alert"
+          style={{ position: "fixed", top: "80px", right: "20px", zIndex: 1050 }}
+        >
+          {error}
+          <button
+            type="button"
+            className="btn-close"
+            onClick={() => setError(null)}
+          ></button>
+        </motion.div>
+      )}
     </div>
   );
 }

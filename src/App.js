@@ -36,9 +36,6 @@ const ResetPasswordForm = lazy(() =>
 const ClientDashboard = lazy(() =>
   import("./features/client/ClientDashboard")
 );
-const ClientMessages = lazy(() =>
-  import("./features/client/ClientMessages")
-);
 
 // Communication Components
 const Messages = lazy(() => import("./features/users/Messages"));
@@ -155,7 +152,7 @@ function App() {
                         showFooter: false,
                       }}
                     >
-                      <ClientMessages />
+                      <Messages isTrainer={false} />
                     </ProtectedLayout>
                   }
                 />
