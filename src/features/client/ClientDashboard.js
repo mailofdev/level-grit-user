@@ -23,7 +23,8 @@ export default function ClientDashboard() {
   const dispatch = useDispatch();
 
   const { dashboard, loading, error } = useSelector((state) => state.client);
-  console.log(dashboard);
+  console.log("Dashboard data:", dashboard);
+  console.log("ClientId:", dashboard?.clientId, "TrainerId:", dashboard?.trainerId);
   const fileInputRef = useRef(null);
   const videoRef = useRef(null);
   const canvasRef = useRef(null);

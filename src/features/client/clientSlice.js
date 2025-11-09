@@ -38,6 +38,8 @@ const clientSlice = createSlice({
 
         // ✅ Normalize & structure dashboard response
         state.dashboard = {
+          clientId: payload.clientId || payload.userId || payload.id || null,
+          trainerId: payload.trainerId || null,
           clientName:
             payload.clientName ||
             payload.fullName ||
