@@ -89,3 +89,51 @@ self.addEventListener('fetch', (event) => {
       })
   );
 });
+
+// ✅ Push event - handle background push notifications
+self.addEventListener('push', (event) => {
+  const data = event.data ? event.data.json() : {};
+  const title = data.notification?.title || 'New Message';
+  const options = {
+    body: data.notification?.body || data.data?.message || 'You have a new message',
+    icon: data.notification?.icon || '/logo192.png',
+    badge: '/logo192.png',
+    tag: data.data?.messageId || 'message',
+    requireInteraction: false,
+    data: data.data || {},
+    vibrate: [200, 100, 200],
+    timestamp: Date.now(),
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(title, options)
+  );
+});
+
+// ✅ Notification click event - open app when notification is clicked
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+
+  const notificationData = event.notification.data;
+  let urlToOpen = '/';
+
+  if (notificationData?.trainerId) {
+    urlToOpen = `/client-messages/${notificationData.trainerId}`;
+  }
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // Check if there's already a window/tab open with the target URL
+      for (let i = 0; i < clientList.length; i++) {
+        const client = clientList[i];
+        if (client.url === urlToOpen && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      // If no window is open, open a new one
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    })
+  );
+});

@@ -19,13 +19,16 @@ import {
 } from "react-router-dom";
 import { Suspense, lazy } from "react";
 import "./styles/themes/variables.css";
+import "./styles/notifications.css";
 import "./App.css";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
+import { NotificationProvider } from "./contexts/NotificationContext";
 import ProtectedRoute from "./components/navigation/ProtectedRoute";
 import ScrollToTop from "./components/navigation/ScrollToTop";
 import ErrorBoundary from "./components/common/ErrorBoundary";
 import MainLayout from "./layouts/MainLayout";
+import NotificationToastContainer from "./components/notifications/NotificationToast";
 
 // Authentication Components
 const LandingPage = lazy(() => import("./features/landing/LandingPage"));
@@ -104,8 +107,10 @@ function App() {
         <Router>
           <ScrollToTop />
           <AuthProvider>
-            <Suspense fallback={<PageLoader />}>
-              <Routes>
+            <NotificationProvider>
+              <NotificationToastContainer />
+              <Suspense fallback={<PageLoader />}>
+                <Routes>
                 {/* ============================================
                     Public Routes - No Authentication Required
                     ============================================ */}
@@ -158,8 +163,9 @@ function App() {
                 />
                 {/* 404 - Catch all unmatched routes */}
                 <Route path="*" element={<NotFound />} />
-              </Routes>
-            </Suspense>
+                </Routes>
+              </Suspense>
+            </NotificationProvider>
           </AuthProvider>
         </Router>
       </ThemeProvider>
