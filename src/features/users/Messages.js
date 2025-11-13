@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import Heading from "../../components/navigation/Heading";
 import { sendMessage, subscribeToMessages } from "../../config/chatService";
 import { getDecryptedUser } from "../../components/common/CommonFunctions";
-import { useNotifications } from "../../contexts/NotificationContext";
 import Loader from "../../components/display/Loader";
 import ClientMessagesUI from "./ClientMessagesUI";
 import TrainerMessagesUI from "./TrainerMessagesUI";
@@ -14,7 +13,6 @@ export default function Messages({ isTrainer = false }) {
   const location = useLocation();
   const params = useParams();
   const loggedInUser = getDecryptedUser();
-  const { markAsRead } = useNotifications();
 
   // Get data from navigation state or URL params
   const {
@@ -44,7 +42,6 @@ export default function Messages({ isTrainer = false }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const messagesEndRef = useRef(null);
-  const hasMarkedAsReadRef = useRef(false);
 
   // Subscribe to messages (real-time updates)
   useEffect(() => {
@@ -62,28 +59,12 @@ export default function Messages({ isTrainer = false }) {
       setMessages(msgs);
       setLoading(false);
       setError(null);
-      
-      // Mark messages as read when client views the conversation
-      if (!isTrainer && msgs.length > 0) {
-        // Mark all unread messages from trainer as read
-        const unreadFromTrainer = msgs.filter(
-          msg => msg.senderId === trainerId && !msg.read
-        );
-        
-        if (unreadFromTrainer.length > 0 && !hasMarkedAsReadRef.current) {
-          unreadFromTrainer.forEach(msg => {
-            markAsRead(msg.id);
-          });
-          hasMarkedAsReadRef.current = true;
-        }
-      }
     });
 
     return () => {
       unsubscribe();
-      hasMarkedAsReadRef.current = false;
     };
-  }, [trainerId, clientId, isTrainer, markAsRead]);
+  }, [trainerId, clientId, isTrainer]);
 
   // Send message
   const handleSubmit = async (e) => {

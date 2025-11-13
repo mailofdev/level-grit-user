@@ -1,8 +1,8 @@
 import { 
   FaCamera, 
-  FaUserCheck, 
-  FaTrophy, 
-  FaSmile,
+  FaFire,
+  FaTrophy,
+  FaComments,
   FaFacebook, 
   FaInstagram, 
   FaLinkedin, 
@@ -222,91 +222,111 @@ const LandingPage = () => {
         className="py-5"
         style={{
           marginTop: "80px",
-          paddingTop: "4rem",
-          paddingBottom: "4rem",
+          paddingTop: "6rem",
+          paddingBottom: "6rem",
+          background: "linear-gradient(135deg, #f5f7fa 0%, #ffffff 100%)",
         }}
       >
         <div className="container">
           <div className="row align-items-center">
-            <div className="col-lg-6 mb-4 mb-lg-0">
+            <div className="col-lg-6 mb-5 mb-lg-0">
               <motion.div {...fadeInUp}>
                 <h1
-                  className="display-3 fw-bold mb-4"
-                  style={{ color: "#333", lineHeight: "1.2" }}
+                  className="display-2 fw-bold mb-4"
+                  style={{ color: "#1a1a1a", lineHeight: "1.2" }}
                 >
-                  Snap. Track. Share<br />
-                  <span style={{ color: "#00C853" }}>Your Progress.</span>
+                  Stay Fit. Stay Consistent.<br />
+                  <span style={{ color: "#00C853" }}>Have Fun Doing It.</span>
                 </h1>
                 <p
                   className="lead mb-4"
-                  style={{ color: "#666", fontSize: "1.1rem" }}
+                  style={{ color: "#666", fontSize: "1.25rem", lineHeight: "1.6" }}
                 >
-                  We don't rely on AI for your well-being — real certified coaches guide you every step. Snap your meals, get instant macros, stay motivated, and celebrate your consistency by sharing streaks with friends and family.
+                  Tracking your meals and progress was never this easy.
+                  <br />
+                  Just snap a photo of your meals — get instant calories & macros, and keep your streak alive for 32 days straight.
                 </p>
                 <motion.button
-                  className="btn btn-lg rounded-pill px-5 py-3"
+                  className="btn btn-lg rounded-pill px-5 py-3 fw-bold"
                   style={{
                     backgroundColor: "#00C853",
                     color: "#fff",
                     border: "none",
-                    minHeight: "52px",
+                    minHeight: "56px",
+                    fontSize: "1.1rem",
+                    boxShadow: "0 4px 15px rgba(0, 200, 83, 0.3)",
                   }}
-                  whileHover={{ scale: 1.05 }}
+                  whileHover={{ scale: 1.05, boxShadow: "0 6px 20px rgba(0, 200, 83, 0.4)" }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => navigate("/login")}
                 >
-                  👉 Join Today & Snap Your First Meal
+                  👉 Join the 32-Day Challenge Now
                 </motion.button>
+                <p className="mt-3 mb-0" style={{ color: "#888", fontSize: "0.95rem" }}>
+                  <em>Fitness meets fun. Consistency made effortless.</em>
+                </p>
               </motion.div>
             </div>
             <div className="col-lg-6 text-center">
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.4 }}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.6 }}
               >
                 <div className="position-relative">
                   <img
                     src="https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=600&h=500&fit=crop&q=80"
-                    alt="Fitness Meal"
+                    alt="Fitness Meal Tracking"
                     className="img-fluid rounded-4 shadow-lg"
                     style={{
-                      maxHeight: "500px",
+                      maxHeight: "550px",
                       objectFit: "cover",
                       width: "100%",
                     }}
                   />
                   <motion.div
-                    className="position-absolute bg-white rounded-3 p-3 shadow"
+                    className="position-absolute bg-white rounded-4 p-4 shadow-lg"
                     style={{
-                      top: "20px",
-                      left: "-20px",
+                      top: "30px",
+                      right: "-30px",
+                      border: "3px solid #00C853",
                     }}
                     initial={{ opacity: 0, y: -20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.5 }}
                     whileHover={{ scale: 1.05 }}
                   >
-                    <small className="text-muted d-block">Streak</small>
-                    <strong style={{ color: "#00C853", fontSize: "1.2rem" }}>
-                      🔥 7 Days
-                    </strong>
+                    <div className="d-flex align-items-center gap-2">
+                      <FaFire size={24} style={{ color: "#FF6B35" }} />
+                      <div>
+                        <small className="text-muted d-block" style={{ fontSize: "0.75rem" }}>Current Streak</small>
+                        <strong style={{ color: "#00C853", fontSize: "1.5rem" }}>
+                          32 Days
+                        </strong>
+                      </div>
+                    </div>
                   </motion.div>
                   <motion.div
-                    className="position-absolute bg-white rounded-3 p-3 shadow"
+                    className="position-absolute bg-white rounded-4 p-4 shadow-lg"
                     style={{
-                      bottom: "20px",
-                      right: "-20px",
+                      bottom: "30px",
+                      left: "-30px",
+                      border: "3px solid #00C853",
                     }}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.7 }}
                     whileHover={{ scale: 1.05 }}
                   >
-                    <small className="text-muted d-block">Macros</small>
-                    <strong style={{ color: "#00C853", fontSize: "1.2rem" }}>
-                      ✓ Tracked
-                    </strong>
+                    <div className="d-flex align-items-center gap-2">
+                      <FaCamera size={24} style={{ color: "#00C853" }} />
+                      <div>
+                        <small className="text-muted d-block" style={{ fontSize: "0.75rem" }}>Instant Macros</small>
+                        <strong style={{ color: "#00C853", fontSize: "1.5rem" }}>
+                          ✓ Tracked
+                        </strong>
+                      </div>
+                    </div>
                   </motion.div>
                 </div>
               </motion.div>
@@ -315,17 +335,52 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* Why Clients Love Us Section */}
+      {/* Let's be honest Section */}
       <section className="py-5" style={{ backgroundColor: "#f8f9fa" }}>
+        <div className="container">
+          <motion.div
+            className="text-center"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+          >
+            <h2
+              className="fw-bold mb-4"
+              style={{ fontSize: "2.5rem", color: "#1a1a1a" }}
+            >
+              Let's be honest —
+            </h2>
+            <div className="row justify-content-center">
+              <div className="col-lg-8">
+                <div className="card border-0 shadow-sm p-5 rounded-4" style={{ backgroundColor: "#fff" }}>
+                  <p className="lead mb-3" style={{ color: "#555", fontSize: "1.2rem", lineHeight: "1.8" }}>
+                    Diet plans are easy to start, but hard to follow.
+                  </p>
+                  <p className="mb-3" style={{ color: "#666", fontSize: "1.1rem", lineHeight: "1.8" }}>
+                    Calls, spreadsheets, and reminders? <strong>Boring.</strong>
+                    <br />
+                    Tracking calories manually? <strong>Exhausting.</strong>
+                    <br />
+                    And staying consistent? <strong>The hardest part.</strong>
+                  </p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Why You'll Love It Section */}
+      <section className="py-5">
         <div className="container">
           <motion.h2
             className="text-center fw-bold mb-5"
-            style={{ fontSize: "2.5rem", color: "#333" }}
+            style={{ fontSize: "2.5rem", color: "#1a1a1a" }}
             initial={{ opacity: 0, y: -20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            Why Clients Love Us
+            💡 Why You'll Love It
           </motion.h2>
           <motion.div
             className="row g-4"
@@ -336,42 +391,55 @@ const LandingPage = () => {
           >
             {[
               {
-                title: "📸 Snap & Upload Meals",
-                desc: "Just take a picture — get instant macro feedback, no guesswork.",
+                emoji: "📸",
+                title: "Snap & Track",
+                desc: "Click a meal photo and get instant macros.",
                 icon: FaCamera,
+                color: "#00C853",
               },
               {
-                title: "🎯 Stay Accountable",
-                desc: "Your coach checks in daily to keep you on track.",
-                icon: FaUserCheck,
+                emoji: "🔥",
+                title: "Stay Consistent",
+                desc: "Build daily streaks like Snapchat, not spreadsheets.",
+                icon: FaFire,
+                color: "#FF6B35",
               },
               {
-                title: "🏆 Share Your Streaks",
-                desc: "Celebrate wins by posting streaks on social media, inspiring your friends (and yourself).",
+                emoji: "🏆",
+                title: "Brag Your Wins",
+                desc: "Share your milestones on Instagram.",
                 icon: FaTrophy,
+                color: "#FFD700",
               },
               {
-                title: "🎉 Make Fitness Fun",
-                desc: "Daily motivation, achievable goals, and social recognition keep you consistent.",
-                icon: FaSmile,
+                emoji: "💬",
+                title: "Chat with Your Coach",
+                desc: "No boring calls or endless WhatsApp texts.",
+                icon: FaComments,
+                color: "#4A90E2",
               },
             ].map((feature, idx) => (
               <div key={idx} className="col-md-6 col-lg-3">
                 <motion.div
                   className="card border-0 shadow-sm h-100 text-center p-4"
-                  style={{ borderRadius: "1rem" }}
-                  whileHover={{ y: -10 }}
+                  style={{ borderRadius: "1.5rem", transition: "all 0.3s ease" }}
+                  whileHover={{ y: -10, boxShadow: "0 10px 30px rgba(0,0,0,0.1)" }}
                   transition={{ duration: 0.3 }}
                 >
+                  <div className="mb-3" style={{ fontSize: "3rem" }}>
+                    {feature.emoji}
+                  </div>
                   <feature.icon
                     className="mx-auto mb-3"
-                    size={48}
-                    style={{ color: "#00C853" }}
+                    size={40}
+                    style={{ color: feature.color }}
                   />
-                  <h5 className="fw-bold mb-3" style={{ color: "#333" }}>
+                  <h5 className="fw-bold mb-3" style={{ color: "#1a1a1a", fontSize: "1.2rem" }}>
                     {feature.title}
                   </h5>
-                  <p className="text-muted mb-0">{feature.desc}</p>
+                  <p className="text-muted mb-0" style={{ lineHeight: "1.6" }}>
+                    {feature.desc}
+                  </p>
                 </motion.div>
               </div>
             ))}
@@ -380,16 +448,16 @@ const LandingPage = () => {
       </section>
 
       {/* How It Works Section */}
-      <section className="py-5">
+      <section className="py-5" style={{ backgroundColor: "#f8f9fa" }}>
         <div className="container">
           <motion.h2
             className="text-center fw-bold mb-5"
-            style={{ fontSize: "2.5rem", color: "#333" }}
+            style={{ fontSize: "2.5rem", color: "#1a1a1a" }}
             initial={{ opacity: 0, y: -20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            How It Works
+            🚀 How It Works
           </motion.h2>
           <motion.div
             className="row justify-content-center g-4"
@@ -400,19 +468,19 @@ const LandingPage = () => {
           >
             {[
               {
-                step: "1",
-                title: "Snap Your Meal",
-                desc: "Upload and get real-time macro feedback.",
+                step: "1️⃣",
+                title: "Snap your meals.",
+                desc: "Get instant calories & progress updates.",
               },
               {
-                step: "2",
-                title: "Coach Keeps You On Track",
-                desc: "Stay accountable with daily nudges and motivation.",
+                step: "2️⃣",
+                title: "Keep your streak alive for 32 days.",
+                desc: "Build consistency like never before.",
               },
               {
-                step: "3",
-                title: "Celebrate Your Streaks",
-                desc: "Share progress on social and keep winning every day.",
+                step: "3️⃣",
+                title: "Share your transformation & inspire others.",
+                desc: "Celebrate your wins and motivate your community.",
               },
             ].map((step, i) => (
               <motion.div
@@ -421,22 +489,21 @@ const LandingPage = () => {
                 whileHover={{ scale: 1.05 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="card border-0 shadow-sm text-center h-100 p-4 rounded-4">
+                <div className="card border-0 shadow-sm text-center h-100 p-5 rounded-4" style={{ backgroundColor: "#fff" }}>
                   <div
-                    className="rounded-circle mx-auto mb-3 d-flex align-items-center justify-content-center"
+                    className="mb-4"
                     style={{
-                      width: "60px",
-                      height: "60px",
-                      backgroundColor: "#00C853",
-                      color: "#fff",
-                      fontSize: "1.5rem",
-                      fontWeight: "bold",
+                      fontSize: "3rem",
                     }}
                   >
                     {step.step}
                   </div>
-                  <h5 className="fw-bold text-dark mb-3">{step.title}</h5>
-                  <p className="text-muted">{step.desc}</p>
+                  <h5 className="fw-bold text-dark mb-3" style={{ fontSize: "1.3rem" }}>
+                    {step.title}
+                  </h5>
+                  <p className="text-muted" style={{ lineHeight: "1.6" }}>
+                    {step.desc}
+                  </p>
                 </div>
               </motion.div>
             ))}
@@ -445,89 +512,124 @@ const LandingPage = () => {
       </section>
 
       {/* Testimonials Section */}
-      <section className="py-5" style={{ backgroundColor: "#f8f9fa" }}>
-        <div className="container text-center">
+      <section className="py-5">
+        <div className="container">
           <motion.h2
             className="text-center fw-bold mb-5"
-            style={{ fontSize: "2.5rem", color: "#333" }}
+            style={{ fontSize: "2.5rem", color: "#1a1a1a" }}
             initial={{ opacity: 0, y: -20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            What Our Clients Say
+            💬 Users Love It
           </motion.h2>
           <motion.div
-            className="mx-auto"
-            style={{ maxWidth: "700px" }}
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
+            className="row g-4 justify-content-center"
+            variants={staggerContainer}
+            initial="initial"
+            whileInView="animate"
             viewport={{ once: true }}
           >
-            <div className="card border-0 shadow-lg rounded-4 p-5">
-              <p
-                className="text-muted fst-italic mb-4"
-                style={{ fontSize: "1.1rem" }}
+            <div className="col-md-5">
+              <motion.div
+                className="card border-0 shadow-lg rounded-4 p-4 h-100"
+                style={{ backgroundColor: "#fff" }}
+                whileHover={{ y: -5 }}
               >
-                🗨️ "I love sharing my streaks! My friends cheer me on, and my coach keeps me consistent — fitness finally feels fun."
-              </p>
-              <p className="fw-bold text-dark mb-0">— Happy Client</p>
+                <p
+                  className="text-muted fst-italic mb-3"
+                  style={{ fontSize: "1.1rem", lineHeight: "1.8" }}
+                >
+                  "It's like Snapchat streaks but for fitness — I've never missed a meal log!"
+                </p>
+                <p className="fw-bold text-dark mb-0">— Sneha, 28</p>
+              </motion.div>
+            </div>
+            <div className="col-md-5">
+              <motion.div
+                className="card border-0 shadow-lg rounded-4 p-4 h-100"
+                style={{ backgroundColor: "#fff" }}
+                whileHover={{ y: -5 }}
+              >
+                <p
+                  className="text-muted fst-italic mb-3"
+                  style={{ fontSize: "1.1rem", lineHeight: "1.8" }}
+                >
+                  "No typing, no tracking — just click and done."
+                </p>
+                <p className="fw-bold text-dark mb-0">— Rohit, 31</p>
+              </motion.div>
             </div>
           </motion.div>
         </div>
       </section>
 
       {/* Final CTA Section */}
-      <section className="py-5">
+      <section className="py-5" style={{ 
+        background: "linear-gradient(135deg, #00C853 0%, #00a844 100%)",
+        color: "#fff"
+      }}>
         <div className="container text-center">
-          <motion.h2
-            className="fw-bold mb-4"
-            style={{ fontSize: "2.5rem", color: "#333" }}
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
           >
-            Start Your Fitness Journey, One Snap at a Time.
-          </motion.h2>
-          <motion.button
-            className="btn btn-lg rounded-pill px-5 py-3"
-            style={{
-              backgroundColor: "#00C853",
-              color: "#fff",
-              border: "none",
-              minHeight: "52px",
-            }}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => navigate("/login")}
-          >
-            👉 Show Off Your Fitness Wins Now
-          </motion.button>
+            <h2
+              className="fw-bold mb-3"
+              style={{ fontSize: "3rem", color: "#fff" }}
+            >
+              Make Fitness Fun Again.
+            </h2>
+            <p
+              className="lead mb-4"
+              style={{ fontSize: "1.5rem", color: "rgba(255,255,255,0.95)" }}
+            >
+              Snap. Track. Share. Transform.
+            </p>
+            <motion.button
+              className="btn btn-lg rounded-pill px-5 py-3 fw-bold"
+              style={{
+                backgroundColor: "#fff",
+                color: "#00C853",
+                border: "none",
+                minHeight: "56px",
+                fontSize: "1.1rem",
+                boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+              }}
+              whileHover={{ scale: 1.05, boxShadow: "0 6px 20px rgba(0,0,0,0.3)" }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => navigate("/login")}
+            >
+              👉 Join the 32-Day Challenge
+            </motion.button>
+          </motion.div>
         </div>
       </section>
 
       {/* PWA Install Button - Floating */}
       {showInstallButton && (
-  <motion.button
-    className="position-fixed shadow-lg rounded-pill d-flex align-items-center gap-2 px-4 py-3"
-    style={{
-      bottom: "20px",
-      right: "20px",
-      zIndex: 1050,
-      minHeight: "56px",
-      backgroundColor: "#00C853",
-      border: "none",
-      color: "#fff",
-    }}
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: 1, y: 0 }}
-    exit={{ opacity: 0, y: 20 }}
-    transition={{ duration: 0.3 }}
-    onClick={handleInstallClick}
-    whileHover={{ scale: 1.05 }}
-  >
-    <FaDownload size={20} />
-    <span className="fw-semibold">Install App</span>
-  </motion.button>
+        <motion.button
+          className="position-fixed shadow-lg rounded-pill d-flex align-items-center gap-2 px-4 py-3"
+          style={{
+            bottom: "20px",
+            right: "20px",
+            zIndex: 1050,
+            minHeight: "56px",
+            backgroundColor: "#00C853",
+            border: "none",
+            color: "#fff",
+          }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 20 }}
+          transition={{ duration: 0.3 }}
+          onClick={handleInstallClick}
+          whileHover={{ scale: 1.05 }}
+        >
+          <FaDownload size={20} />
+          <span className="fw-semibold">Install App</span>
+        </motion.button>
       )}
 
       {/* Footer */}

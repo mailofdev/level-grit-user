@@ -9,7 +9,6 @@ import UserMenu from "../topbar/UserMenu";
 import ThemeSwitch from "../display/ThemeSwitch";
 import LogoutModal from "../topbar/LogoutModal";
 import ProfileModal from "../topbar/ProfileModal";
-import NotificationBell from "../notifications/NotificationBell";
 import { logout } from "../../features/auth/authSlice";
 import { getDecryptedUser } from "../common/CommonFunctions";
 import { getRoutes } from "../navigation/Routes";
@@ -110,7 +109,6 @@ const Topbar = ({
 
             <div className="d-flex flex-column flex-lg-row align-items-stretch align-items-lg-center gap-2 gap-lg-3  w-lg-auto">
               {showSearch && <SearchBar />}
-              {user && user.role === 'Client' && <NotificationBell />}
               {showThemeToggle && <ThemeSwitch enableThemeAlert />}
               {showUserMenu && (
                 <UserMenu
